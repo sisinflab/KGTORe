@@ -10,7 +10,7 @@ experiment:
   evaluation:
     cutoffs: [10]
     simple_metrics: [nDCGRendle2020]
-  gpu: 0
+  gpu: 1
   external_models_path: ../external/models/__init__.py
   models:
     MostPop:
