@@ -1,0 +1,73 @@
+experiment:
+  backend: pytorch
+  dataset: movielens
+  data_config:
+    strategy: dataset
+    dataset_path: ../data/{0}/dataset.tsv
+#    strategy: fixed
+#    train_path: ../data/{0}/train.tsv
+#    test_path: ../data/{0}/val.tsv
+    side_information:
+      - dataloader: KGINTSVLoader
+        attributes: ../data/{0}/kg.tsv
+        # entities: ../data/{0}/mov/toyentities.tsv
+  prefiltering:
+    strategy: iterative_k_core
+    core: 5
+  splitting:
+#    save_on_disk: True
+#    save_folder: ../data/{0}/split/
+    test_splitting:
+      strategy: random_subsampling
+      test_ratio: 0.2
+  top_k: 10
+  gpu: 1
+  external_models_path: ../external/models/__init__.py
+  evaluation:
+    cutoffs: [10]
+    simple_metrics: [nDCGRendle2020, nDCG, HR, Precision, Recall, MAP, MRR, ItemCoverage, UserCoverage, NumRetrieved, UserCoverage, Gini, SEntropy, EFD, EPC]
+    relevance_threshold: 3
+  models:
+#    external.KGLightGCNEdge:
+#      meta:
+#        hyper_max_evals: 10
+#        hyper_opt_alg: tpe
+#        validation_metric: Recall
+#        verbose: True
+#        save_weights: False
+#        save_recs: False
+#        validation_rate: 20
+#        restore: False
+#      lr: [ loguniform, -8.90775527898, -6.90775527898 ]
+#      epochs: 400
+#      factors: 64
+#      batch_size: 1024
+#      l_w: [ loguniform, -16.11809565095, -2.30258509299]  # [ quniform, 10e-5, 10, 100 ]
+#      n_layers: 1
+#      loader: KGTORETSVLoader
+    external.KGAT:
+      meta:
+        hyper_max_evals: 10
+        hyper_opt_alg: tpe
+        validation_metric: Recall
+        verbose: True
+        save_weights: False
+        save_recs: False
+        validation_rate: 1
+        restore: False
+      loader: KGINTSVLoader
+      epochs: 200
+      batch_size: 1024
+    external.KGCN:
+      meta:
+        hyper_max_evals: 10
+        hyper_opt_alg: tpe
+        validation_metric: Recall
+        verbose: True
+        save_weights: False
+        save_recs: False
+        validation_rate: 1
+        restore: False
+      loader: KGINTSVLoader
+      epochs: 200
+      batch_size: 1024
