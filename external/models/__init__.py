@@ -14,13 +14,12 @@ from .Proxy import ProxyRecommender
 from .ktup import KTUP
 from .cke import CKE
 from .cofm import CoFM
-from .kgflex import KGFlex
 
 import sys
 
 for _backend in sys.modules["external"].backend:
     if _backend == "tensorflow":
-        pass
+        from .kgflex import KGFlex
     elif _backend == "pytorch":
         from .lightgcn.LightGCN import LightGCN
         from .dgcf.DGCF import DGCF
