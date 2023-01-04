@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 
 from data_preprocessing.filters.basic import IterativeKCore
@@ -23,6 +24,7 @@ class Binarize(Filter):
         self._dataset = self._dataset[retained]
         self._dataset = self._dataset[['u', 'i']]
         new_n_ratings = len(self._dataset)
+        self._dataset['r'] = [1] * new_n_ratings
         print(f'{self.__class__.__name__}: {n_ratings - new_n_ratings} transactions removed')
         print(f'{self.__class__.__name__}: {new_n_ratings} transactions retained')
         self._flag = (n_ratings - new_n_ratings) == 0
