@@ -9,7 +9,7 @@ from elliot.dataset.modular_loaders.abstract_loader import AbstractLoader
 class KGINTSVLoader(AbstractLoader):
     def __init__(self, users: t.Set, items: t.Set, ns: SimpleNamespace, logger: object):
         self.logger = logger
-        self.attribute_file = getattr(ns, "attributes", None)
+        self.attribute_file = getattr(ns, "kg", None)
         self.users = users
         self.items = items
         if self.attribute_file is not None:
