@@ -139,7 +139,7 @@ class KGATModel(torch.nn.Module, ABC):
         pos_t_e = self.entity_embedding(pos_t)
         neg_t_e = self.entity_embedding(neg_t)
         r_e = self.relation_embedding(r)
-        r_trans_w = self.trans_w(r.to(self.device)).view(
+        r_trans_w = self.trans_w(r.to(self.device)).to(self.device).view(
             r.size(0).to(self.device), self.embed_k.to(self.device), self.kg_embed_k.to(self.device)
         )
 
