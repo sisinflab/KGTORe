@@ -39,9 +39,9 @@ class KAHFMLoader(AbstractLoader):
         return self.users, self.items
 
     def filter(self, users, items):
-        self.users = self.users
+        self.users = self.users & users
         # self.mapping = {k: v for k, v in self.mapping.items() if k in items}
-        self.items = self.items
+        self.items = self.items & items
 
     def create_namespace(self):
         ns = SimpleNamespace()
