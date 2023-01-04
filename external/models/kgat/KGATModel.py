@@ -77,6 +77,7 @@ class KGATModel(torch.nn.Module, ABC):
             self.num_relations + 1, self.embed_k * self.kg_embed_k
         )
         torch.nn.init.xavier_uniform_(self.trans_w.weight)
+        self.trans_w.to(self.device)
         self.aggregator_layers = torch.nn.ModuleList()
         for idx, (input_dim, output_dim) in enumerate(
                 zip(self.layers[:-1], self.layers[1:])
@@ -139,8 +140,8 @@ class KGATModel(torch.nn.Module, ABC):
         pos_t_e = self.entity_embedding(pos_t)
         neg_t_e = self.entity_embedding(neg_t)
         r_e = self.relation_embedding(r)
-        r_trans_w = self.trans_w(r.to(self.device)).to(self.device).view(
-            r.size(0).to(self.device), self.embed_k.to(self.device), self.kg_embed_k.to(self.device)
+        r_trans_w = self.trans_w(r).view(
+            r.size(0), self.embed_k, self.kg_embed_k
         )
 
         h_e = torch.bmm(h_e, r_trans_w).squeeze(1)
