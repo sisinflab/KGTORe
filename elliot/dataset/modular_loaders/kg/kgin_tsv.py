@@ -22,8 +22,8 @@ class KGINTSVLoader(AbstractLoader):
         return self.users, self.items
 
     def filter(self, users: t.Set[int], items: t.Set[int]):
-        self.users = self.users
-        self.items = self.items
+        self.users = self.users & users
+        self.items = self.items & items
         self.map_ = self.map_[self.map_['subject'].isin(self.items)]
         self.entities = set(self.map_.values[:, 0]).union(set(self.map_.values[:, 2]))
         self.items = set.intersection(self.items, self.entities)
