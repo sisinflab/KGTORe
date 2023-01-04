@@ -28,7 +28,7 @@ experiment:
       batch_size: 2048
       epochs: 200
       l_w: [ loguniform, -16.118095651, -5.298317367 ]
-      batch_eval: 512
+      batch_eval: 1024
       neighbor_sample_size: 8
       n_iter: 1
       seed: 123
