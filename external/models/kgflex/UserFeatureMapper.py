@@ -1,43 +1,41 @@
 import random
 import math
 import multiprocessing as mp
+mp.set_start_method('fork')
 from tqdm import tqdm
 from itertools import islice
 from operator import itemgetter
 from collections import OrderedDict, Counter
 
 
-def worker(user, user_items, neg_items, if1, if2, fol, sol, seed):
+def worker(user, user_items, neg_items, item_features, limit, seed):
     random.seed(seed)
-    counters = dict()
-    counters[1] = user_features_counter(user_items, neg_items, if1)
-    counters[2] = user_features_counter(user_items, neg_items, if2)
-    return user, limited_second_order_selection(counters, fol, sol)
+    counter = user_features_counter(user_items, neg_items, item_features)
+    return user, limited_selection(counter, limit)
 
 
 class UserFeatureMapper:
     def __init__(self, data, item_features: dict, item_features2=None, random_seed=42,
-                 first_order_limit=100, second_order_limit=100):
+                 max_features_per_user=100, second_order_limit=0):
         # for all the users compute the information for each feature
         self._data = data
         self._item_features = item_features
-        self._item_features2 = item_features2
-        self._first_order_limit = first_order_limit
-        self._second_order_limit = second_order_limit
+        # self._item_features2 = item_features2
+        self._max_features_per_user = max_features_per_user
+        # self._second_order_limit = second_order_limit
         self._users = self._data.private_users.keys()
         self._items = set(self._data.private_items.keys())
-        self._depth = 2
+        # self._depth = 2
 
-        self.users_features = self.user_features_selected_mp()
+        self.user_features = self.user_features_selected_mp()
 
     def user_features_selected_mp(self):
         def args():
             return ((u,
                      set(self._data.i_train_dict[u].keys()),
                      set.difference(self._items, set(self._data.i_train_dict[u].keys())),
-                     self._item_features, self._item_features2,
-                     self._first_order_limit,
-                     self._second_order_limit,
+                     self._item_features,
+                     self._max_features_per_user,
                      random.randint(0, 100000)) for u in self._users)
 
         arguments = args()
@@ -48,11 +46,11 @@ class UserFeatureMapper:
     def user_features_selected(self, user):
         user_items = set(self._data.i_train_dict[user].keys())
         neg_items = set.difference(self._items, user_items)
-        counters = dict()
-        counters[1] = user_features_counter(user_items, neg_items, self._item_features)
-        counters[2] = user_features_counter(user_items, neg_items, self._item_features2)
+        # counters = dict()
+        counter = user_features_counter(user_items, neg_items, self._item_features)
+        # counters[2] = user_features_counter(user_items, neg_items, self._item_features2)
 
-        return user, limited_second_order_selection(counters, self._first_order_limit, self._second_order_limit)
+        return user, limited_selection(counter, self._max_features_per_user)
 
 
 def user_features_counter(user_items, neg_items, item_features_):
@@ -88,7 +86,7 @@ def features_entropy(pos_counter, neg_counter, counter):
     """
     :param pos_counter: number of times in which feature is true and target is true
     :param neg_counter: number of times in which feature is true and target is false
-    :param counter: number of items from which feaures have been extracted
+    :param counter: number of items from which features have been extracted
     :return: dictionary feature: entropy with descending order by entropy
     """
 
@@ -122,74 +120,23 @@ def features_entropy(pos_counter, neg_counter, counter):
     return OrderedDict(sorted(attribute_entropies.items(), key=itemgetter(1, 0), reverse=True))
 
 
-def limited_second_order_selection(counters, limit_first, limit_second):
+def limited_selection(counter, limit):
     # 1st-order-features
-    pos_1, neg_1, counter_1 = counters[1]
+    pos, neg, count = counter
     # 2nd-order-features
-    pos_2, neg_2, counter_2 = counters[2]
+    # pos_2, neg_2, counter_2 = counters[2]
 
-    if limit_first == -1 and limit_second == -1:
-        pos_f = pos_1 + pos_2
-        neg_f = neg_1 + neg_2
+    if limit:
+        assert limit > 0, "The number of semantic features must be positive"
+        entropies = features_entropy(pos, neg, count)
+
+        # top 10 1st-order-features ordered by entropy
+        entropies_red = OrderedDict(islice(entropies.items(), limit))
+        # filtering pos and neg features respect to the 'top limit' selected
+        pos_f = Counter({k: pos[k] for k in entropies_red.keys()})
+        neg_f = Counter({k: neg[k] for k in entropies_red.keys()})
     else:
-        if limit_first == -1:
-            if limit_second != 0:
-                entropies_2 = features_entropy(pos_2, neg_2, counter_2)
-                # top 2nd-order-features ordered by entropy
-                entropies_2_red = OrderedDict(islice(entropies_2.items(), limit_second))
-                # filtering pos and neg features respect to the 'top limit' selected
-                pos_2_red = Counter({k: pos_2[k] for k in entropies_2_red.keys()})
-                neg_2_red = Counter({k: neg_2[k] for k in entropies_2_red.keys()})
-            else:
-                pos_2_red = Counter()
-                neg_2_red = Counter()
+        pos_f = pos
+        neg_f = neg
 
-            # final features: 1st-order-f + top 2nd-order-f
-            pos_f = pos_1 + pos_2_red
-            neg_f = neg_1 + neg_2_red
-        elif limit_second == -1:
-            if limit_first != 0:
-                entropies_1 = features_entropy(pos_1, neg_1, counter_1)
-
-                # top 1st-order-features ordered by entropy
-                entropies_1_red = OrderedDict(islice(entropies_1.items(), limit_second))
-                # filtering pos and neg features respect to the 'top limit' selected
-                pos_1_red = Counter({k: pos_1[k] for k in entropies_1_red.keys()})
-                neg_1_red = Counter({k: neg_1[k] for k in entropies_1_red.keys()})
-            else:
-                pos_1_red = Counter()
-                neg_1_red = Counter()
-
-            # final features: top 1st-order-f + 2nd-order-f
-            pos_f = pos_1_red + pos_2
-            neg_f = neg_1_red + neg_2
-        else:
-            if limit_first != 0:
-                entropies_1 = features_entropy(pos_1, neg_1, counter_1)
-
-                # top 10 1st-order-features ordered by entropy
-                entropies_1_red = OrderedDict(islice(entropies_1.items(), limit_first))
-                # filtering pos and neg features respect to the 'top limit' selected
-                pos_1_red = Counter({k: pos_1[k] for k in entropies_1_red.keys()})
-                neg_1_red = Counter({k: neg_1[k] for k in entropies_1_red.keys()})
-            else:
-                pos_1_red = Counter()
-                neg_1_red = Counter()
-
-            if limit_second != 0:
-                entropies_2 = features_entropy(pos_2, neg_2, counter_2)
-
-                # top 10 2nd-order-features ordered by entropy
-                entropies_2_red = OrderedDict(islice(entropies_2.items(), limit_second))
-                # filtering pos and neg features respect to the 'top limit' selected
-                pos_2_red = Counter({k: pos_2[k] for k in entropies_2_red.keys()})
-                neg_2_red = Counter({k: neg_2[k] for k in entropies_2_red.keys()})
-            else:
-                pos_2_red = Counter()
-                neg_2_red = Counter()
-
-            # final features: top 1st-order-f + top 2nd-order-f
-            pos_f = pos_1_red + pos_2_red
-            neg_f = neg_1_red + neg_2_red
-
-    return features_entropy(pos_f, neg_f, counter_2)
+    return features_entropy(pos_f, neg_f, count)
