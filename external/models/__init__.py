@@ -15,9 +15,6 @@ from .ktup import KTUP
 from .cke import CKE
 from .cofm import CoFM
 from .kgflex import KGFlex
-from .kgflex_tf import KGFlexTF
-from .kgflex_tf2 import KGFlexTF2
-from .kgflex_umap import KGFlexUmap
 
 import sys
 

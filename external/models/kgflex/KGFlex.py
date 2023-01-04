@@ -1,13 +1,5 @@
-"""
-Module description:
-
-"""
-
-__version__ = '0.1'
-__author__ = 'Vito Walter Anelli, Antonio Ferrara, Alberto Carlo Maria Mancino'
-__email__ = 'vitowalter.anelli@poliba.it, antonio.ferrara@poliba.it, alberto.mancino@poliba.it'
-
-
+import numpy as np
+from scipy.sparse import csr_matrix
 from tqdm import tqdm
 import pandas as pd
 
@@ -28,8 +20,7 @@ class KGFlex(RecMixin, BaseRecommenderModel):
         self._params_list = [
             ("_lr", "lr", "lr", 0.01, None, None),
             ("_embedding", "embedding", "em", 10, int, None),
-            ("_first_order_limit", "first_order_limit", "fol", -1, None, None),
-            ("_second_order_limit", "second_order_limit", "sol", -1, None, None),
+            ("_max_features_per_user", "max_features_per_user", "uf", None, None, None),
             ("_loader", "loader", "load", "KGRec", None, None),
         ]
         self.autoset_params()
@@ -40,60 +31,41 @@ class KGFlex(RecMixin, BaseRecommenderModel):
         self._side = getattr(self._data.side_information, self._loader, None)
         self._sampler = cs.Sampler(self._data.i_train_dict)
 
-        first_order_limit = self._params.first_order_limit
-        second_order_limit = self._params.second_order_limit
+        max_features_per_user = self._params.max_features_per_user
         embedding = self._embedding
         logger = self.logger
         learning_rate = self._lr
 
-        # ------------------------------ ITEM FEATURES ------------------------------
-        uri_to_private = {v: self._data.public_items[k] for k, v in self._side.mapping.items()}
-        logger.info('Item features extraction...')
-        item_features_df = pd.DataFrame()
-        item_features_df['item'] = self._side.triples['uri'].map(uri_to_private)
-        item_features_df['f'] = list(zip(self._side.triples['predicate'], self._side.triples['object']))
-        item_features_df = item_features_df.dropna().astype({'item': int})
-        self.item_features_1hop = item_features_df.groupby('item')['f'].apply(set).to_dict()
-
-        item_features_df = pd.DataFrame()
-        item_features_df['item'] = self._side.second_order_features['uri_x'].map(uri_to_private)
-        item_features_df['f'] = list(
-            zip(self._side.second_order_features['predicate_x'], self._side.second_order_features['predicate_y'],
-                self._side.second_order_features['object_y']))
-        item_features_df = item_features_df.dropna().astype({'item': int})
-        self.item_features_2hop = item_features_df.groupby('item')['f'].apply(set).to_dict()
+        item_features = {self._data.public_items[i]: v for i, v in self._side.item_features.items()}
 
         # ------------------------------ USER FEATURES ------------------------------
         logger.info('Features info: user features selection...')
         self.user_feature_mapper = UserFeatureMapper(data=self._data,
-                                                     item_features=self.item_features_1hop,
-                                                     item_features2=self.item_features_2hop,
-                                                     first_order_limit=first_order_limit,
-                                                     second_order_limit=second_order_limit)
+                                                     item_features=item_features,
+                                                     max_features_per_user=max_features_per_user)
 
         # ------------------------------ MODEL FEATURES ------------------------------
         logger.info('Features info: features mapping...')
         features = set()
-        user_features = self.user_feature_mapper.users_features
+        user_features = self.user_feature_mapper.user_features
         for _, f in user_features.items():
             features = set.union(features, set(f))
 
-        item_features_selected = {item: set.intersection(set.union(self.item_features_1hop.get(item, set()),
-                                                                   self.item_features_2hop.get(item, set())), features)
-                                  for item in self._data.private_items}
+        item_features_selected = {item: set.intersection(item_features.get(item, {}), features) for
+                                  item in self._data.private_items}
 
         feature_key_mapping = dict(zip(features, range(len(features))))
 
         logger.info('Features info: {} features found'.format(len(features)))
 
         # ------------------------------ MODEL ------------------------------
-        self._model = KGFlexModel(learning_rate=learning_rate,
+        self._model = KGFlexModel(data=self._data,
                                   n_features=len(features),
-                                  feature_key_mapping=feature_key_mapping,
-                                  item_features=item_features_selected,
+                                  learning_rate=learning_rate,
                                   embedding_size=embedding,
                                   user_features=user_features,
-                                  data=self._data)
+                                  item_features=item_features_selected,
+                                  feature_key_mapping=feature_key_mapping)
 
     @property
     def name(self):
