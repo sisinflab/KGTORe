@@ -17,7 +17,6 @@ class KGATModel(torch.nn.Module, ABC):
                  kg_embed_k,
                  aggr,
                  l_w,
-                 num_layers,
                  weight_size,
                  message_dropout,
                  kg_graph,
@@ -48,7 +47,7 @@ class KGATModel(torch.nn.Module, ABC):
         self.aggregator_type = aggr
         self.learning_rate = learning_rate
         self.l_w = l_w
-        self.layers = [self.embed_k] + [weight_size] * num_layers
+        self.layers = [self.embed_k] + list(weight_size)
         self.mess_dropout = message_dropout
         self.kg_graph = kg_graph
 

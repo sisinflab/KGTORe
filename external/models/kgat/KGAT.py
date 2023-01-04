@@ -3,7 +3,6 @@ import torch
 import os
 import pandas as pd
 import dgl
-from scipy import sparse
 import math
 from operator import itemgetter
 
@@ -14,7 +13,7 @@ from elliot.recommender.base_recommender_model import init_charger
 from elliot.recommender.recommender_utils_mixin import RecMixin
 from .KGATModel import KGATModel
 
-import numpy as np
+from ast import literal_eval as make_tuple
 
 
 class KGAT(RecMixin, BaseRecommenderModel):
@@ -29,8 +28,8 @@ class KGAT(RecMixin, BaseRecommenderModel):
             ("_kg_factors", "kg_factors", "kg_factors", 64, int, None),
             ("_l_w", "l_w", "l_w", 0.01, float, None),
             ("_aggr", "aggr", "aggr", 'gcn', str, None),
-            ("_n_layers", "n_layers", "n_layers", 3, int, None),
-            ("_weight_size", "weight_size", "weight_size", 64, int, None),
+            ("_weight_size", "weight_size", "weight_size", "(64,32,16)", lambda x: list(make_tuple(str(x))),
+             lambda x: self._batch_remove(str(x), " []").replace(",", "-")),
             ("_message_dropout", "message_dropout", "message_dropout", 0.1, float, None),
             ("_loader", "loader", "loader", "KGINTSVLoader", None, None)
         ]
@@ -67,7 +66,6 @@ class KGAT(RecMixin, BaseRecommenderModel):
             kg_embed_k=self._kg_factors,
             aggr=self._aggr,
             l_w=self._l_w,
-            num_layers=self._n_layers,
             weight_size=self._weight_size,
             message_dropout=self._message_dropout,
             kg_graph=dgl_graph,
