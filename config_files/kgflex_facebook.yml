@@ -19,14 +19,14 @@ experiment:
     external.KGFlex:
       loader: KGFlexLoader
       meta:
-        hyper_max_evals: 1
+        hyper_max_evals: 20
         hyper_opt_alg: tpe
-        validation_rate: 8
         verbose: True
-        save_weights: False
         save_recs: False
-      lr: 1
-      embedding: 3
-      epochs: 100
-      max_features_per_user: 1000
-      batch_size: 256
+        validation_rate: 1
+        validation_metric: nDCGRendle2020@10
+      lr: [loguniform, -2.30258509299, -5.2983173665]
+      embedding: [choice, [1,3,5]]
+      epochs: 200
+      max_features_per_user: [choice, [100,400,1000]]
+      batch_size: 64
