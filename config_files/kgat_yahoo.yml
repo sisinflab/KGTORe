@@ -8,7 +8,7 @@ experiment:
     side_information:
       - dataloader: KGINTSVLoader
         kg: ../data/{0}/kgat/kg.tsv
-  dataset: movielens
+  dataset: yahoo_movies
   top_k: 10
   evaluation:
     cutoffs: [10]
@@ -29,7 +29,7 @@ experiment:
       factors: 64
       kg_factors: 64
       aggr: bi
-      batch_size: 2048
+      batch_size: 256
       l_w: [ loguniform, -11.512925465, 4.60517018599]
       weight_size: (64,32,16)
       message_dropout: [loguniform, -2.30258509299, -0.22314355131]
