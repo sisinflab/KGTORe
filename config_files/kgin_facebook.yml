@@ -5,10 +5,13 @@ experiment:
     train_path: ../data/{0}/train.tsv
     validation_path: ../data/{0}/val.tsv
     test_path: ../data/{0}/test.tsv
+    side_information:
+      - dataloader: KGINTSVLoader
+        kg: ../data/{0}/kgin/kg.tsv
   dataset: facebook_book
-  top_k: 50
+  top_k: 10
   evaluation:
-    cutoffs: [10, 20, 50]
+    cutoffs: [10]
     simple_metrics: [nDCGRendle2020]
   gpu: 0
   external_models_path: ../external/models/__init__.py
@@ -35,6 +38,7 @@ experiment:
       m_drop_r: 0.1
       ind: distance
       seed: 123
+      loader: KGINTSVLoader
       early_stopping:
         patience: 5
         mode: auto
