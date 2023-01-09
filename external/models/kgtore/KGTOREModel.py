@@ -8,7 +8,7 @@ import random
 from torch_sparse import matmul
 from .DecisionPaths import DecisionPaths
 
-class KGLightGCNEdgeModel(torch.nn.Module, ABC):
+class KGTOREModel(torch.nn.Module, ABC):
     def __init__(self,
                  num_users,
                  num_items,

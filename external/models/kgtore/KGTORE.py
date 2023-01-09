@@ -9,12 +9,12 @@ from elliot.dataset.samplers import custom_sampler as cs
 from elliot.recommender import BaseRecommenderModel
 from elliot.recommender.base_recommender_model import init_charger
 from elliot.recommender.recommender_utils_mixin import RecMixin
-from .KGLightGCNEdgeModel import KGLightGCNEdgeModel
+from .KGTOREModel import KGTOREModel
 from .DecisionPaths import DecisionPaths
 from .LoadEdgeFeatures import LoadEdgeFeatures
 
 
-class KGLightGCNEdge(RecMixin, BaseRecommenderModel):
+class KGTORE(RecMixin, BaseRecommenderModel):
     @init_charger
     def __init__(self, data, config, params, *args, **kwargs):
 
@@ -68,7 +68,7 @@ class KGLightGCNEdge(RecMixin, BaseRecommenderModel):
         self.num_interactions = row.shape[0]
 
 
-        self._model = KGLightGCNEdgeModel(
+        self._model = KGTOREModel(
             num_users=self._num_users,
             num_items=self._num_items,
             num_interactions=self.num_interactions,

@@ -9,11 +9,11 @@ from elliot.dataset.modular_loaders.abstract_loader import AbstractLoader
 class KGTORETSVLoader(AbstractLoader):
     def __init__(self, users: t.Set, items: t.Set, ns: SimpleNamespace, logger: object):
         self.logger = logger
-        self.attribute_file = getattr(ns, "attributes", None)
+        self.kg = getattr(ns, "kg", None)
         self.users = users   # questi da dove vengono presi ?
         self.items = items
-        if self.attribute_file is not None:
-            self.map_ = self.read_triplets(self.attribute_file)  # KG
+        if self.kg is not None:
+            self.map_ = self.read_triplets(self.kg)  # KG
 
     def get_mapped(self):
         return self.users, self.items
