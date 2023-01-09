@@ -6,9 +6,9 @@ import warnings
 
 warnings.warn = warn
 from sklearn.tree import DecisionTreeClassifier
-import pandas as pd
 import random
 import scipy
+from scipy.sparse import csr_matrix
 import os.path
 import pandas as pd
 from tqdm import tqdm
@@ -16,12 +16,15 @@ from sklearn.preprocessing import MultiLabelBinarizer
 import torch
 import numpy as np
 from torch_sparse import SparseTensor
+import multiprocessing as mp
+# mp.set_start_method('fork')
 
 seed = 0
 
 
-class DecisionPaths():
-    def __init__(self, interactions, u_i_dict, kg, public_items, public_users, transaction, device, df_name, npr=10, criterion='entropy'):
+class DecisionPaths:
+    def __init__(self, interactions, u_i_dict, kg, public_items, public_users, transaction, device, df_name, npr=10,
+                 criterion='entropy'):
         self.interactions = interactions
         self.public_items = public_items
         self.public_users = public_users
@@ -71,75 +74,86 @@ class DecisionPaths():
         index_list = [i for i in indices.index for z in range(indices.iloc[i, -1])]
         edge_features.index = index_list
         self.edge_features = SparseTensor(row=torch.tensor(edge_features.index, dtype=torch.int64),
-                                          col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),dtype=torch.int64),
-                                          value=torch.tensor(edge_features['val'].astype(int).to_numpy(),dtype=torch.int64),
-                                          sparse_sizes=(self.transaction, edge_features['feature'].nunique())).to(self.device)
+                                          col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),
+                                                           dtype=torch.int64),
+                                          value=torch.tensor(edge_features['val'].astype(int).to_numpy(),
+                                                             dtype=torch.int64),
+                                          sparse_sizes=(self.transaction, edge_features['feature'].nunique())).to(
+            self.device)
 
     def build_decision_paths(self):
         criterion = self.criterion
-        users = set(self.interactions.keys())
         items = set(self.i_f.keys())
         npr = self.npr
 
-        def create_user_df(positive_items, negative_items, i_f, npr):
-            negatives_len = npr * len(positive_items)  # n° item negativi che vogliamo considerare
-            if len(positive_items) * npr <= len(negative_items):
-                neg_items = random.sample(list(negative_items), k=negatives_len)
-            else:
-                ratio = len(negative_items) // len(positive_items)
-                neg_items = random.sample(list(negative_items), k=ratio * len(positive_items)) if ratio > 0 else list(negative_items)
-                neg_items.extend(random.choices(list(negative_items), k=negatives_len - len(neg_items)))
+        print("Building decision trees")
+        users = self.u_i_dict.keys()
+        args = ((u, set(self.interactions[u].keys()), self.u_i_dict[u], items, self.i_f, npr, criterion) for u in users)
+        n_procs = mp.cpu_count()
+        print(f'Running multiprocessing with {n_procs} processes')
 
-            all_items = list()
-            all_items.extend(list(positive_items))
-            all_items.extend(list(neg_items))
-            mlb = MultiLabelBinarizer()
-            d = {k: i_f[k] for k in all_items}
-            df = pd.DataFrame(mlb.fit_transform(d.values()), columns=mlb.classes_)
-            df['item_id'] = d.keys()
-            df['positive'] = df['item_id'].isin(positive_items).astype(int)
-            return df
-
-        def create_user_tree(df, criterion):
-            clf = DecisionTreeClassifier(criterion=criterion, class_weight={1: npr, 0: 1}, random_state=seed)
-            X = scipy.sparse.csr_matrix(df.iloc[:, :-2].values)
-            y = df.iloc[:, -1].values
-            clf.fit(X, y)
-            return clf
-
-        def retrieve_decision_paths(df, clf, u, u_i_dict):
-            #full_positive_df = df[df["positive"] == 1]
-            full_positive_df = df.iloc[pd.Index(df['item_id']).get_indexer(u_i_dict[u])]
-            csr = scipy.sparse.csr_matrix(full_positive_df.iloc[:, :-2].values)
-            decision_path = clf.decision_path(csr)
-            # decision_path = clf.decision_path(full_positive_df.iloc[:, :-2])
-            # decision_path_dict = dict() # v1 old
-            u_dp = list()
-            for i in range(0, full_positive_df.shape[0]):
-                sample_no = i  # riga_sample iesimo
-                dp_i = decision_path.indices[decision_path.indptr[sample_no]: decision_path.indptr[sample_no + 1]]
-                a = clf.tree_.feature[dp_i][clf.tree_.feature[dp_i] > 0]
-                feature_is_present = full_positive_df.iloc[sample_no, a]
-                feature_is_present = feature_is_present.replace(0, -1)
-                final_dp_feature = list(feature_is_present.index.astype(int) * feature_is_present)
-                # decision_path_dict[full_positive_df.iloc[sample_no, -2]] = final_dp_feature v1 old
-                u_dp.extend([[u, full_positive_df.iloc[sample_no, -2], j] for j in final_dp_feature])  # u_dp = [ [user, itemid, 1stf], [user, itemid, 2nfeat], .., [user2, itemn, f1], ..]
-            return u_dp
+        with mp.Pool(n_procs) as pool:
+            user_decision_paths = pool.starmap(user_decision_path, args)
 
         print("Building decision trees")
-        for u in tqdm(self.u_i_dict.keys()):
-        # for u in [1, 2, 3]:
-            df = create_user_df(set(self.interactions[u].keys()),
-                                set.difference(items, set(self.interactions[u].keys())),
-                                self.i_f,
-                                npr)
-            clf = create_user_tree(df, criterion)
-            u_dp = retrieve_decision_paths(df, clf, u, self.u_i_dict)
-            self.edge_features.extend(u_dp)
-            # u_dp_dict = retrieve_decision_paths(df, clf) # v1 old
-            # self.edge_features.extend([[u, item, u_dp_dict[item]] for item in u_dp_dict.keys()]) # v1 old
+
+        self.edge_features = [p for path in user_decision_paths for p in path]
         self.create_edge_features_matrix()
 
 
 
+def create_user_df(positive_items, negative_items, i_f, npr, random_seed=42):
 
+    np.random.seed(random_seed)
+    random.seed(random_seed)
+
+    negatives_len = npr * len(positive_items)
+    if len(positive_items) * npr <= len(negative_items):
+        neg_items = random.sample(list(negative_items), k=negatives_len)
+    else:
+        ratio = len(negative_items) // len(positive_items)
+        neg_items = random.sample(list(negative_items), k=ratio * len(positive_items)) if ratio > 0 else list(
+            negative_items)
+        neg_items.extend(random.choices(list(negative_items), k=negatives_len - len(neg_items)))
+
+    all_items = list()
+    all_items.extend(list(positive_items))
+    all_items.extend(list(neg_items))
+    mlb = MultiLabelBinarizer()
+    d = {k: i_f[k] for k in all_items}
+    df = pd.DataFrame(mlb.fit_transform(d.values()), columns=mlb.classes_)
+    df['item_id'] = d.keys()
+    df['positive'] = df['item_id'].isin(positive_items).astype(int)
+    return df
+
+def create_user_tree(df, npr, criterion):
+    clf = DecisionTreeClassifier(criterion=criterion, class_weight={1: npr, 0: 1}, random_state=seed)
+    X = csr_matrix(df.iloc[:, :-2].values)
+    y = df.iloc[:, -1].values
+    clf.fit(X, y)
+    return clf
+
+
+def retrieve_decision_paths(df, clf, u, user_i_dict):
+    full_positive_df = df.iloc[pd.Index(df['item_id']).get_indexer(user_i_dict)]
+    csr = scipy.sparse.csr_matrix(full_positive_df.iloc[:, :-2].values)
+    decision_path = clf.decision_path(csr)
+    u_dp = list()
+    for i in range(0, full_positive_df.shape[0]):
+        sample_no = i
+        dp_i = decision_path.indices[decision_path.indptr[sample_no]: decision_path.indptr[sample_no + 1]]
+        a = clf.tree_.feature[dp_i][clf.tree_.feature[dp_i] > 0]
+        feature_is_present = full_positive_df.iloc[sample_no, a]
+        feature_is_present = feature_is_present.replace(0, -1)
+        final_dp_feature = list(feature_is_present.index.astype(int) * feature_is_present)
+        u_dp.extend([[u, full_positive_df.iloc[sample_no, -2], j] for j in
+                     final_dp_feature])
+    return u_dp
+
+
+def user_decision_path(user, user_items, user_i_dict, items: set, item_features: dict, npr, criterion):
+    print(f'user {user}')
+    df = create_user_df(user_items, set.difference(items, user_items), item_features, npr)
+    clf = create_user_tree(df, npr, criterion)
+    u_dp = retrieve_decision_paths(df, clf, user, user_i_dict)
+    return u_dp
