@@ -102,7 +102,9 @@ class DecisionPaths():
 
         def create_user_tree(df, criterion):
             clf = DecisionTreeClassifier(criterion=criterion, class_weight={1: npr, 0: 1}, random_state=seed)
-            clf.fit(df.iloc[:, :-2], df.iloc[:, -1])
+            X = scipy.sparse.csr_matrix(df.iloc[:, :-2].values)
+            y = df.iloc[:, -1].values
+            clf.fit(X, y)
             return clf
 
         def retrieve_decision_paths(df, clf, u, u_i_dict):
