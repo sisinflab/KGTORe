@@ -140,7 +140,7 @@ class DecisionPaths():
                                 self.i_f,
                                 npr)
             # clf = create_user_tree(df, criterion)
-            u_dp = retrieve_decision_paths(df, clf_0, u, self.u_i_dict)
+            u_dp = retrieve_decision_paths(df_0, clf_0, 0, self.u_i_dict)
             self.edge_features.extend(u_dp)
             # u_dp_dict = retrieve_decision_paths(df, clf) # v1 old
             # self.edge_features.extend([[u, item, u_dp_dict[item]] for item in u_dp_dict.keys()]) # v1 old
