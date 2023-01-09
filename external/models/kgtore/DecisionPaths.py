@@ -20,7 +20,8 @@ seed = 0
 
 
 class DecisionPaths():
-    def __init__(self, interactions, u_i_dict, kg, public_items, public_users, transaction, device, df_name, npr=10, criterion='entropy'):
+    def __init__(self, interactions, u_i_dict, kg, public_items, public_users, transaction, device, df_name, npr=10,
+                 criterion='entropy'):
         self.interactions = interactions
         self.public_items = public_items
         self.public_users = public_users
@@ -70,9 +71,12 @@ class DecisionPaths():
         index_list = [i for i in indices.index for z in range(indices.iloc[i, -1])]
         edge_features.index = index_list
         self.edge_features = SparseTensor(row=torch.tensor(edge_features.index, dtype=torch.int64),
-                                          col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),dtype=torch.int64),
-                                          value=torch.tensor(edge_features['val'].astype(int).to_numpy(),dtype=torch.int64),
-                                          sparse_sizes=(self.transaction, edge_features['feature'].nunique())).to(self.device)
+                                          col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),
+                                                           dtype=torch.int64),
+                                          value=torch.tensor(edge_features['val'].astype(int).to_numpy(),
+                                                             dtype=torch.int64),
+                                          sparse_sizes=(self.transaction, edge_features['feature'].nunique())).to(
+            self.device)
 
     def build_decision_paths(self):
         criterion = self.criterion
@@ -86,7 +90,8 @@ class DecisionPaths():
                 neg_items = random.sample(list(negative_items), k=negatives_len)
             else:
                 ratio = len(negative_items) // len(positive_items)
-                neg_items = random.sample(list(negative_items), k=ratio * len(positive_items)) if ratio > 0 else list(negative_items)
+                neg_items = random.sample(list(negative_items), k=ratio * len(positive_items)) if ratio > 0 else list(
+                    negative_items)
                 neg_items.extend(random.choices(list(negative_items), k=negatives_len - len(neg_items)))
 
             all_items = list()
@@ -105,7 +110,7 @@ class DecisionPaths():
             return clf
 
         def retrieve_decision_paths(df, clf, u, u_i_dict):
-            #full_positive_df = df[df["positive"] == 1]
+            # full_positive_df = df[df["positive"] == 1]
             full_positive_df = df.iloc[pd.Index(df['item_id']).get_indexer(u_i_dict[u])]
             decision_path = clf.decision_path(full_positive_df.iloc[:, :-2])
             # decision_path_dict = dict() # v1 old
@@ -118,23 +123,25 @@ class DecisionPaths():
                 feature_is_present = feature_is_present.replace(0, -1)
                 final_dp_feature = list(feature_is_present.index.astype(int) * feature_is_present)
                 # decision_path_dict[full_positive_df.iloc[sample_no, -2]] = final_dp_feature v1 old
-                u_dp.extend([[u, full_positive_df.iloc[sample_no, -2], j] for j in final_dp_feature])  # u_dp = [ [user, itemid, 1stf], [user, itemid, 2nfeat], .., [user2, itemn, f1], ..]
+                u_dp.extend([[u, full_positive_df.iloc[sample_no, -2], j] for j in
+                             final_dp_feature])  # u_dp = [ [user, itemid, 1stf], [user, itemid, 2nfeat], .., [user2, itemn, f1], ..]
             return u_dp
 
         print("Building decision trees")
+        df_0 = create_user_df(set(self.interactions[0].keys()),
+                              set.difference(items, set(self.interactions[0].keys())),
+                              self.i_f,
+                              npr)
+        clf_0 = create_user_tree(df_0, criterion)
         for u in tqdm(self.u_i_dict.keys()):
-        # for u in [1, 2, 3]:
+            # for u in [1, 2, 3]:
             df = create_user_df(set(self.interactions[u].keys()),
                                 set.difference(items, set(self.interactions[u].keys())),
                                 self.i_f,
                                 npr)
-            clf = create_user_tree(df, criterion)
-            u_dp = retrieve_decision_paths(df, clf, u, self.u_i_dict)
+            # clf = create_user_tree(df, criterion)
+            u_dp = retrieve_decision_paths(df, clf_0, u, self.u_i_dict)
             self.edge_features.extend(u_dp)
             # u_dp_dict = retrieve_decision_paths(df, clf) # v1 old
             # self.edge_features.extend([[u, item, u_dp_dict[item]] for item in u_dp_dict.keys()]) # v1 old
         self.create_edge_features_matrix()
-
-
-
-
