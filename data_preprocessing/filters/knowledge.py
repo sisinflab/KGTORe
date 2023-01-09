@@ -5,7 +5,7 @@ import pandas as pd
 
 
 class FilterKG(Filter):
-    def __init__(self, kg: pd.DataFrame, rare_obj_threshold=2, min_obj_threshold=11, **kwargs):
+    def __init__(self, kg: pd.DataFrame, rare_obj_threshold=3, min_obj_threshold=10, **kwargs):
         super(FilterKG, self).__init__()
         self._kg = kg.copy()
         self._obj_threshold = rare_obj_threshold
@@ -15,10 +15,10 @@ class FilterKG(Filter):
         triples = len(self._kg)
         obj_counter = Counter(self._kg.o)
         filter_rare_objs = [o for o, c in obj_counter.items() if c < self._obj_threshold]
-        filter_common_objs = [o for o, c in obj_counter.items() if c < self._min_obj_threshold]
+        filter_common_objs = [o for o, c in obj_counter.items() if c > self._min_obj_threshold]
 
         preds_one_app = set(self._kg[self._kg.o.isin(filter_rare_objs)].p.unique())
-        preds_more_one_app = set(self._kg[~self._kg.o.isin(filter_common_objs)].p.unique())
+        preds_more_one_app = set(self._kg[self._kg.o.isin(filter_common_objs)].p.unique())
 
         to_remove_preds = set.difference(preds_one_app, preds_more_one_app)
         self._kg = self._kg[~self._kg.p.isin(to_remove_preds)]
