@@ -142,7 +142,7 @@ def retrieve_decision_paths(df, clf, u, user_i_dict):
     for i in range(0, full_positive_df.shape[0]):
         sample_no = i
         dp_i = decision_path.indices[decision_path.indptr[sample_no]: decision_path.indptr[sample_no + 1]]
-        a = clf.tree_.feature[dp_i][clf.tree_.feature[dp_i] > 0]
+        a = clf.tree_.feature[dp_i][clf.tree_.feature[dp_i] != -2]
         feature_is_present = full_positive_df.iloc[sample_no, a]
         feature_is_present = feature_is_present.replace(0, -1)
         final_dp_feature = list(feature_is_present.index.astype(int) * feature_is_present)
