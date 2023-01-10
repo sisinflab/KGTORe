@@ -46,6 +46,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.alpha = torch.tensor([1 / (k + 1) for k in range(len(self.weight_size_list))])
         self.edge_index = torch.tensor(edge_index, dtype=torch.int64)
         self.edge_features = edge_features
+        self.edge_features.to(self.device)
 
         self.Gu = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embed_k))))
