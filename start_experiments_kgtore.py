@@ -12,4 +12,4 @@ for n in npr:
     for c in criterion:
         print(f'Starting training with npr: {n}, criterion: {c}')
         run_experiment(f"config_files/kgtore_{args.dataset}_{n}_{c}.yml")
-        print('End training with npr: {n}, criterion: {c}')
+        print(f'End training with npr: {n}, criterion: {c}')
