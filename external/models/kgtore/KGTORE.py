@@ -57,7 +57,9 @@ class KGTORE(RecMixin, BaseRecommenderModel):
                                             public_users=data.public_users,
                                             transaction=self._data.transactions,
                                             device=device,
-                                            df_name=config.dataset
+                                            df_name=config.dataset,
+                                            criterion=self._criterion,
+                                            npr=self._npr
                                             )
             self.edge_features = Dec_Paths_class.edge_features
 
