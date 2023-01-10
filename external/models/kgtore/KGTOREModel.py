@@ -75,9 +75,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
     def propagate_embeddings(self, evaluate=False):
-        print(self.edge_features.device)
-        print(self.F.device)
-        edge_embeddings = matmul(self.edge_features, self.F)
+        edge_embeddings = matmul(self.edge_features, self.F.to(self.device))
         nonzero = torch.count_nonzero(self.edge_features.to_dense(), dim=1)
         edge_embeddings = torch.div(edge_embeddings, nonzero.reshape(-1, 1))
         # torch.div(a, b)
