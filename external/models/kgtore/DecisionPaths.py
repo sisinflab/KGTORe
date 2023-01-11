@@ -93,7 +93,7 @@ class DecisionPaths:
         print("Building decision trees")
         users = self.u_i_dict.keys()
         args = ((u, set(self.interactions[u].keys()), self.u_i_dict[u], items, self.i_f, npr, criterion) for u in users)
-        n_procs = mp.cpu_count()
+        n_procs = mp.cpu_count()-2
         print(f'Running multiprocessing with {n_procs} processes')
 
         with mp.Pool(n_procs) as pool:
