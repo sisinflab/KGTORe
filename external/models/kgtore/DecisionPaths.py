@@ -18,6 +18,7 @@ import numpy as np
 from torch_sparse import SparseTensor
 import multiprocessing as mp
 # mp.set_start_method('fork')
+from collections import Counter
 
 seed = 0
 
@@ -73,6 +74,9 @@ class DecisionPaths:
         indices = edge_features.groupby(['user', 'item']).size().reset_index(name='Freq')
         index_list = [i for i in indices.index for z in range(indices.iloc[i, -1])]
         edge_features.index = index_list
+        counted = Counter(index_list)
+        val2 = [v for i, v in counted.items() for z in range(v)]
+        edge_features['val'] = edge_features['val'] / val2
         self.edge_features = SparseTensor(row=torch.tensor(edge_features.index, dtype=torch.int64),
                                           col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),
                                                            dtype=torch.int64),

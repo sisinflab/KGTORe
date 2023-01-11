@@ -2,6 +2,7 @@ import pandas as pd
 import torch
 from torch_sparse import SparseTensor
 import numpy as np
+from collections import Counter
 
 def LoadEdgeFeatures(path, transactions):
     edge_features = pd.read_csv(path, sep='\t', header=None)
@@ -11,9 +12,14 @@ def LoadEdgeFeatures(path, transactions):
     new_mapping = {p: pnew for pnew, p in enumerate(edge_features['feature'].unique())}
     edge_features['feature'] = edge_features['feature'].map(new_mapping)
     # reindex by interaction
-    indices = edge_features.groupby(['user', 'item']).size().reset_index(name='Freq')
+    groups = edge_features.groupby(['user', 'item'])
+    # edge_features['val'] = groups['val'].apply(lambda x: x/len(x))
+    indices = groups.size().reset_index(name='Freq')
     index_list = [i for i in indices.index for z in range(indices.iloc[i, -1])]
     edge_features.index = index_list
+    counted = Counter(index_list)
+    val2 = [v for i, v in counted.items() for z in range(v)]
+    edge_features['val'] = edge_features['val'] / val2
     return SparseTensor(row=torch.tensor(edge_features.index, dtype=torch.int64),
                                       col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),
                                                        dtype=torch.int64),
