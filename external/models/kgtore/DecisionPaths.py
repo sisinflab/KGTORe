@@ -156,7 +156,6 @@ def retrieve_decision_paths(df, clf, u, user_i_dict):
 
 
 def user_decision_path(user, user_items, user_i_dict, items: set, item_features: dict, npr, criterion):
-    print(f'user {user}')
     df = create_user_df(user_items, set.difference(items, user_items), item_features, npr)
     clf = create_user_tree(df, npr, criterion)
     u_dp = retrieve_decision_paths(df, clf, user, user_i_dict)
