@@ -8,6 +8,7 @@ import random
 from torch_sparse import matmul
 from .DecisionPaths import DecisionPaths
 
+
 class KGTOREModel(torch.nn.Module, ABC):
     def __init__(self,
                  num_users,
@@ -78,7 +79,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         edge_embeddings = matmul(self.edge_features, self.F.to(self.device))
 
         # edge embeddings normalization
-        #edge_embeddings = torch.nn.functional.normalize(edge_embeddings, p=2, dim=1)
+        # edge_embeddings = torch.nn.functional.normalize(edge_embeddings, p=2, dim=1)
 
         # nonzero = torch.count_nonzero(self.edge_features.to_dense(), dim=1)
         # edge_embeddings = torch.div(edge_embeddings, nonzero.reshape(-1, 1))
@@ -132,11 +133,13 @@ class KGTOREModel(torch.nn.Module, ABC):
         # ind_loss = torch.abs(torch.corrcoef(self.F[selected_features]))
         # ind_loss = (ind_loss.sum() - n_selected_features) / 2
 
-        # n_edges = self.edge_features.size(0)
-        # n_selected_edges = int(n_features*0.2)
-        # selected_edges = random.sample(list(range(n_edges)), n_selected_edges)
-
-
+        alfa = 1
+        n_edges = self.edge_features.size(0)
+        n_selected_edges = int(n_edges * 0.1)
+        selected_edges = random.sample(list(range(n_edges)), n_selected_edges)
+        ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_features[e].storage._col])).sum() - len(
+            self.edge_features[e].storage._col) for e in selected_edges]
+        ind_loss = sum(ind_loss) / n_selected_edges
 
         gu, gi = self.propagate_embeddings()
         user, pos, neg = batch
@@ -148,7 +151,7 @@ class KGTOREModel(torch.nn.Module, ABC):
                                torch.norm(self.Gi, 2))
 
         loss += reg_loss
-        # loss += self.l_w * alfa * ind_loss
+        loss += alfa * ind_loss
 
         self.optimizer.zero_grad()
         loss.backward()

@@ -5,7 +5,7 @@ parser = argparse.ArgumentParser(description="Run sample main.")
 parser.add_argument('--dataset', type=str, default='movielens')
 args = parser.parse_args()
 
-npr = [20, 30, 40, 50]
+npr = [1, 3, 10, 20]
 criterion = ['entropy', 'gini']
 
 for n in npr:
