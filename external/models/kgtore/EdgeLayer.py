@@ -1,7 +1,7 @@
 from abc import ABC
 
 from torch_geometric.nn import MessagePassing
-from torch_geometric.utils import degree
+from torch_geometric.utils import degree, add_self_loops
 
 
 class EdgeLayer(MessagePassing, ABC):
@@ -10,6 +10,7 @@ class EdgeLayer(MessagePassing, ABC):
         self.normalize = normalize
 
     def forward(self, x, edge_index, edge_attr):
+
         if self.normalize:
             row, col = edge_index
             deg = degree(col, x.size(0), dtype=x.dtype)

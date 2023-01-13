@@ -23,6 +23,6 @@ def LoadEdgeFeatures(path, transactions):
     return SparseTensor(row=torch.tensor(edge_features.index, dtype=torch.int64),
                                       col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),
                                                        dtype=torch.int64),
-                                      value=torch.tensor(edge_features['val'].astype(int).to_numpy(),
-                                                         dtype=torch.int64),
+                                      value=torch.tensor(edge_features['val'].astype(float).to_numpy(),
+                                                         dtype=torch.float32),
                                       sparse_sizes=(transactions, edge_features['feature'].nunique()))

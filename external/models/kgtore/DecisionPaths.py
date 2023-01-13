@@ -17,7 +17,7 @@ import torch
 import numpy as np
 from torch_sparse import SparseTensor
 import multiprocessing as mp
-# mp.set_start_method('fork')
+mp.set_start_method('fork')
 from collections import Counter
 
 seed = 0
@@ -80,8 +80,8 @@ class DecisionPaths:
         self.edge_features = SparseTensor(row=torch.tensor(edge_features.index, dtype=torch.int64),
                                           col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),
                                                            dtype=torch.int64),
-                                          value=torch.tensor(edge_features['val'].astype(int).to_numpy(),
-                                                             dtype=torch.int64),
+                                          value=torch.tensor(edge_features['val'].astype(float).to_numpy(),
+                                                             dtype=torch.float32),
                                           sparse_sizes=(self.transaction, edge_features['feature'].nunique())).to(
             self.device)
 

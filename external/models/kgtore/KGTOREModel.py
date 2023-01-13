@@ -76,6 +76,10 @@ class KGTOREModel(torch.nn.Module, ABC):
 
     def propagate_embeddings(self, evaluate=False):
         edge_embeddings = matmul(self.edge_features, self.F.to(self.device))
+
+        # edge embeddings normalization
+        #edge_embeddings = torch.nn.functional.normalize(edge_embeddings, p=2, dim=1)
+
         # nonzero = torch.count_nonzero(self.edge_features.to_dense(), dim=1)
         # edge_embeddings = torch.div(edge_embeddings, nonzero.reshape(-1, 1))
         # torch.div(a, b)
@@ -119,6 +123,21 @@ class KGTOREModel(torch.nn.Module, ABC):
         return torch.matmul(gu.to(self.device), torch.transpose(gi.to(self.device), 0, 1))
 
     def train_step(self, batch):
+
+        # independence loss
+        # alfa = 0.1
+        # n_features = self.F.shape[0]
+        # n_selected_features = int(n_features*0.2)
+        # selected_features = random.sample(list(range(n_features)), n_selected_features)
+        # ind_loss = torch.abs(torch.corrcoef(self.F[selected_features]))
+        # ind_loss = (ind_loss.sum() - n_selected_features) / 2
+
+        # n_edges = self.edge_features.size(0)
+        # n_selected_edges = int(n_features*0.2)
+        # selected_edges = random.sample(list(range(n_edges)), n_selected_edges)
+
+
+
         gu, gi = self.propagate_embeddings()
         user, pos, neg = batch
         xu_pos = self.forward(inputs=(gu[user[:, 0]], gi[pos[:, 0]]))
@@ -127,7 +146,9 @@ class KGTOREModel(torch.nn.Module, ABC):
         loss = torch.sum(self.softplus(-difference))
         reg_loss = self.l_w * (torch.norm(self.Gu, 2) +
                                torch.norm(self.Gi, 2))
+
         loss += reg_loss
+        # loss += self.l_w * alfa * ind_loss
 
         self.optimizer.zero_grad()
         loss.backward()
