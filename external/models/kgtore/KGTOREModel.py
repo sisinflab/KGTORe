@@ -133,13 +133,13 @@ class KGTOREModel(torch.nn.Module, ABC):
         # ind_loss = torch.abs(torch.corrcoef(self.F[selected_features]))
         # ind_loss = (ind_loss.sum() - n_selected_features) / 2
 
-        alfa = 1
-        n_edges = self.edge_features.size(0)
-        n_selected_edges = int(n_edges * 0.1)
-        selected_edges = random.sample(list(range(n_edges)), n_selected_edges)
-        ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_features[e].storage._col])).sum() - len(
-            self.edge_features[e].storage._col) for e in selected_edges]
-        ind_loss = sum(ind_loss) / n_selected_edges
+        #alfa = 1
+        #n_edges = self.edge_features.size(0)
+        #n_selected_edges = int(n_edges * 0.1)
+        #selected_edges = random.sample(list(range(n_edges)), n_selected_edges)
+        #ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_features[e].storage._col])).sum() - len(
+            #self.edge_features[e].storage._col) for e in selected_edges]
+        #ind_loss = sum(ind_loss) / n_selected_edges
 
         gu, gi = self.propagate_embeddings()
         user, pos, neg = batch
@@ -151,7 +151,7 @@ class KGTOREModel(torch.nn.Module, ABC):
                                torch.norm(self.Gi, 2))
 
         loss += reg_loss
-        loss += alfa * ind_loss
+        #loss += alfa * ind_loss
 
         self.optimizer.zero_grad()
         loss.backward()
