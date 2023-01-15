@@ -154,7 +154,9 @@ class KGTOREModel(torch.nn.Module, ABC):
         difference = torch.clamp(xu_pos - xu_neg, -80.0, 1e8)
         loss = torch.sum(self.softplus(-difference))
         reg_loss = self.l_w * (torch.norm(self.Gu, 2) +
-                               torch.norm(self.Gi, 2))
+                               torch.norm(self.Gi, 2) +
+                               torch.norm(self.projection.weight, 2) +
+                               torch.norm(self.projection.bias, 2))
 
         loss += reg_loss
         #loss += alfa * ind_loss
