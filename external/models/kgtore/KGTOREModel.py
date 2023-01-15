@@ -125,7 +125,7 @@ class KGTOREModel(torch.nn.Module, ABC):
 
     def train_step(self, batch):
 
-        # independence loss
+        # independence loss over all the features
         # alfa = 0.1
         # n_features = self.F.shape[0]
         # n_selected_features = int(n_features*0.2)
@@ -133,6 +133,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         # ind_loss = torch.abs(torch.corrcoef(self.F[selected_features]))
         # ind_loss = (ind_loss.sum() - n_selected_features) / 2
 
+        # independence loss over the features within the same path
         #alfa = 1
         #n_edges = self.edge_features.size(0)
         #n_selected_edges = int(n_edges * 0.1)
