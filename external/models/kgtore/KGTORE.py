@@ -27,13 +27,13 @@ class KGTORE(RecMixin, BaseRecommenderModel):
         self._params_list = [
             ("_lr", "lr", "lr", 0.0005, float, None),
             ("_factors", "factors", "factors", 64, int, None),
+            ("_features", "features", "features", 64, int, None),
             ("_l_w", "l_w", "l_w", 0.01, float, None),
             ("_n_layers", "n_layers", "n_layers", 1, int, None),
             ("_npr", "npr", "npr", 10, int, None),
             ("_criterion", "criterion", "criterion", "entropy", str, None),
             ("_loader", "loader", "loader", "KGTORETSVLoader", None, None)
         ]
-
 
         self.autoset_params()
         self._side = getattr(self._data.side_information, self._loader, None)
@@ -63,12 +63,9 @@ class KGTORE(RecMixin, BaseRecommenderModel):
                                             )
             self.edge_features = Dec_Paths_class.edge_features
 
-
-
         col = [c + self._num_users for c in col]
         self.edge_index = np.array([list(row) + col, col + list(row)])
         self.num_interactions = row.shape[0]
-
 
         self._model = KGTOREModel(
             num_users=self._num_users,
@@ -76,6 +73,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             num_interactions=self.num_interactions,
             learning_rate=self._lr,
             embed_k=self._factors,
+            embed_f=self._features,
             l_w=self._l_w,
             n_layers=self._n_layers,
             edge_index=self.edge_index,

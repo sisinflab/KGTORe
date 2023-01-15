@@ -16,12 +16,13 @@ class KGTOREModel(torch.nn.Module, ABC):
                  num_interactions,
                  learning_rate,
                  embed_k,
+                 embed_f,
                  l_w,
                  n_layers,
                  edge_index,
                  edge_features,
                  random_seed,
-                 name="LightGCNEdge",
+                 name="KGTORE",
                  **kwargs
                  ):
         super().__init__()
@@ -40,6 +41,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.num_items = num_items
         self.num_interactions = num_interactions
         self.embed_k = embed_k
+        self.embed_f = embed_f
         self.learning_rate = learning_rate
         self.l_w = l_w
         self.n_layers = n_layers
@@ -55,12 +57,11 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.Gi = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.num_items, self.embed_k))))
         self.Gi.to(self.device)
-        # self.Ge = None
 
         # features matrix (for edges)
         self.feature_dim = edge_features.size(1)
         self.F = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embed_k)))
+            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embed_f)))
         )
         self.F.to(self.device)
 
@@ -68,6 +69,10 @@ class KGTOREModel(torch.nn.Module, ABC):
 
         for layer in range(self.n_layers):
             propagation_network_list.append((EdgeLayer(), 'x, edge_index -> x'))
+
+        # projection layer
+        self.projection = torch.nn.Linear(self.embed_f, self.embed_k)
+        self.projection.to(self.device)
 
         self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list)
         self.propagation_network.to(self.device)
@@ -86,7 +91,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         # torch.div(a, b)
         ego_embeddings = torch.cat((self.Gu.to(self.device), self.Gi.to(self.device)), 0)
         all_embeddings = [ego_embeddings]
-        edge_embeddings = torch.cat([edge_embeddings, edge_embeddings], dim=0)
+        edge_embeddings = torch.cat([self.projection(edge_embeddings), self.projection(edge_embeddings)], dim=0)
 
         for layer in range(0, self.n_layers):
             if evaluate:
