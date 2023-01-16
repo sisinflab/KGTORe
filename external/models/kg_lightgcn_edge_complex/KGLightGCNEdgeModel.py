@@ -6,23 +6,22 @@ import torch_geometric
 import numpy as np
 import random
 from torch_sparse import matmul
+import math
 from .DecisionPaths import DecisionPaths
 
-
-class KGTOREModel(torch.nn.Module, ABC):
+class KGLightGCNEdgeComplexModel(torch.nn.Module, ABC):
     def __init__(self,
                  num_users,
                  num_items,
                  num_interactions,
                  learning_rate,
                  embed_k,
-                 embed_f,
                  l_w,
                  n_layers,
                  edge_index,
                  edge_features,
                  random_seed,
-                 name="KGTORE",
+                 name="LightGCNEdge",
                  **kwargs
                  ):
         super().__init__()
@@ -41,7 +40,6 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.num_items = num_items
         self.num_interactions = num_interactions
         self.embed_k = embed_k
-        self.embed_f = embed_f
         self.learning_rate = learning_rate
         self.l_w = l_w
         self.n_layers = n_layers
@@ -49,29 +47,30 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.alpha = torch.tensor([1 / (k + 1) for k in range(len(self.weight_size_list))])
         self.edge_index = torch.tensor(edge_index, dtype=torch.int64)
         self.edge_features = edge_features
-        self.edge_features.to(self.device)
 
         self.Gu = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embed_k))))
+            torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embed_k), dtype=torch.cfloat)))
         self.Gu.to(self.device)
+
         self.Gi = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.num_items, self.embed_k))))
+            torch.nn.init.xavier_normal_(torch.empty((self.num_items, self.embed_k), dtype=torch.cfloat)))
         self.Gi.to(self.device)
+        # self.Ge = None
 
         # features matrix (for edges)
         self.feature_dim = edge_features.size(1)
         self.F = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embed_f)))
+            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embed_k)))
         )
         self.F.to(self.device)
 
-        self.projection = torch.nn.Linear(self.embed_f, 1)
-        self.projection.to(self.device)
+        self.approx_bound_F = 3 * math.sqrt(2.0 / float(self.feature_dim + self.embed_k))
+
 
         propagation_network_list = []
 
         for layer in range(self.n_layers):
-            propagation_network_list.append((EdgeLayer(), 'x, edge_index -> x'))
+            propagation_network_list.append((EdgeLayer(self.approx_bound_F), 'x, edge_index -> x'))
 
         self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list)
         self.propagation_network.to(self.device)
@@ -80,17 +79,22 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
     def propagate_embeddings(self, evaluate=False):
-        edge_embeddings = matmul(self.edge_features, self.F.to(self.device))
-
-        # edge embeddings normalization
-        # edge_embeddings = torch.nn.functional.normalize(edge_embeddings, p=2, dim=1)
-
-        # nonzero = torch.count_nonzero(self.edge_features.to_dense(), dim=1)
-        # edge_embeddings = torch.div(edge_embeddings, nonzero.reshape(-1, 1))
-        # torch.div(a, b)
+        edge_embeddings = matmul(self.edge_features, self.F)
         ego_embeddings = torch.cat((self.Gu.to(self.device), self.Gi.to(self.device)), 0)
         all_embeddings = [ego_embeddings]
-        edge_embeddings = torch.cat([self.projection(edge_embeddings), self.projection(edge_embeddings)], dim=0)
+        edge_embeddings = torch.cat([edge_embeddings, edge_embeddings], dim=0)
+
+        pi = 3.14159265358979323846
+
+        # re_x_j, im_x_j = torch.chunk(x_j, 2, dim=1)
+
+        # Make phases of relations uniformly distributed in [-pi, pi]
+        phase_edge_attr = edge_embeddings / (self.approx_bound_F / pi)
+
+        re_edge_attr = torch.cos(phase_edge_attr)
+        im_edge_attr = torch.sin(phase_edge_attr)
+
+        edge_embeddings = torch.view_as_complex(torch.stack((re_edge_attr, im_edge_attr), dim=2))
 
         for layer in range(0, self.n_layers):
             if evaluate:
@@ -119,48 +123,22 @@ class KGTOREModel(torch.nn.Module, ABC):
         gu, gi = inputs
         gamma_u = torch.squeeze(gu).to(self.device)
         gamma_i = torch.squeeze(gi).to(self.device)
-        # b_i = torch.squeeze(bi).to(self.device)
 
-        # xui = torch.sum(gamma_u * gamma_i, 1) + b_i
-        xui = torch.sum(gamma_u * gamma_i, 1)
-
-        return xui
+        return torch.view_as_real(torch.linalg.vecdot(gamma_u, gamma_i)).norm(dim=-1)
 
     def predict(self, gu, gi, **kwargs):
-        return torch.matmul(gu.to(self.device), torch.transpose(gi.to(self.device), 0, 1)) # + self.bi
+        return torch.view_as_real(torch.matmul(gu.to(self.device), torch.transpose(gi.to(self.device), 0, 1))).norm(dim=-1)
 
     def train_step(self, batch):
-
-        # independence loss over all the features
-        # alfa = 0.1
-        # n_features = self.F.shape[0]
-        # n_selected_features = int(n_features*0.2)
-        # selected_features = random.sample(list(range(n_features)), n_selected_features)
-        # ind_loss = torch.abs(torch.corrcoef(self.F[selected_features]))
-        # ind_loss = (ind_loss.sum() - n_selected_features) / 2
-
-        # independence loss over the features within the same path
-        #alfa = 1
-        #n_edges = self.edge_features.size(0)
-        #n_selected_edges = int(n_edges * 0.1)
-        #selected_edges = random.sample(list(range(n_edges)), n_selected_edges)
-        #ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_features[e].storage._col])).sum() - len(
-            #self.edge_features[e].storage._col) for e in selected_edges]
-        #ind_loss = sum(ind_loss) / n_selected_edges
-
         gu, gi = self.propagate_embeddings()
         user, pos, neg = batch
         xu_pos = self.forward(inputs=(gu[user[:, 0]], gi[pos[:, 0]]))
         xu_neg = self.forward(inputs=(gu[user[:, 0]], gi[neg[:, 0]]))
         difference = torch.clamp(xu_pos - xu_neg, -80.0, 1e8)
         loss = torch.sum(self.softplus(-difference))
-        reg_loss = self.l_w * (torch.norm(self.Gu, 2) +
-                               torch.norm(self.Gi, 2) +
-                               torch.norm(self.projection.weight, 2) +
-                               torch.norm(self.projection.bias, 2))
-
+        reg_loss = self.l_w * (torch.norm(self.Gu, 3)**3 +
+                               torch.norm(self.Gi, 3)**3)
         loss += reg_loss
-        #loss += alfa * ind_loss
 
         self.optimizer.zero_grad()
         loss.backward()

@@ -25,11 +25,12 @@ experiment:
         validation_rate: 1
         validation_metric: nDCGRendle2020@10
       batch_size: 64
-      lr: 0.0005922750643212075
+      lr: 0.00005922750643212075
       epochs: 200
       factors: 64
+      features: 16
       l_w: 0.0002140563566611268
-      n_layers: 2
+      n_layers: 3
       npr: 30
       criterion: entropy
       loader: KGTORETSVLoader

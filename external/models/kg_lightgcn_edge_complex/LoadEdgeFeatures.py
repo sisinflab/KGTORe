@@ -19,20 +19,10 @@ def LoadEdgeFeatures(path, transactions):
     edge_features.index = index_list
     counted = Counter(index_list)
     val2 = [v for i, v in counted.items() for z in range(v)]
-    # ss = edge_features.groupby(['user', 'item']).transform(
-    #     lambda x: (np.array(range(len(x), 0, -1)) / sum(np.array(range(len(x), 0, -1)))))
-    # edge_features['val'] = abs(edge_features['val'])
-
     edge_features['val'] = edge_features['val'] / val2
-
-    # edge_features['val'] = ss['val'] * edge_features['val']
-
-
-    # edge_features['val'] = abs(edge_features['val'])
-
     return SparseTensor(row=torch.tensor(edge_features.index, dtype=torch.int64),
                                       col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),
                                                        dtype=torch.int64),
                                       value=torch.tensor(edge_features['val'].astype(float).to_numpy(),
-                                                         dtype=torch.float32),
-                                      sparse_sizes=(transactions, edge_features['feature'].nunique()),)
+                                                         dtype=torch.float64),
+                                      sparse_sizes=(transactions, edge_features['feature'].nunique()))

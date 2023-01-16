@@ -16,7 +16,7 @@ experiment:
   gpu: 0
   external_models_path: ../external/models/__init__.py
   models:
-    external.KGTORE:
+    external.KGLightGCNEdgeComplex:
       meta:
         hyper_max_evals: 20
         hyper_opt_alg: tpe
@@ -30,7 +30,7 @@ experiment:
       factors: 64
       l_w: [ loguniform, -11.512925465, -2.30258509299 ]
       n_layers: 3
-      npr: 1
+      npr: 10
       criterion: entropy
       loader: KGTORETSVLoader
       seed: 123
