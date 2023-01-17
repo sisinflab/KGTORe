@@ -29,4 +29,5 @@ class EdgeLayer(MessagePassing, ABC):
 
     def message(self, x_j, edge_attr):
         # return torch.unsqueeze(torch.mean(edge_attr, dim=-1), dim=-1) * x_j
-        return torch.abs(edge_attr) * x_j
+#        return torch.abs(edge_attr) * x_j
+        return edge_attr * x_j
