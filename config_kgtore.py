@@ -1,14 +1,14 @@
-experiment:
+KGTORE_CONFIG = """experiment:
   backend: pytorch
   data_config:
     strategy: fixed
-    train_path: ../data/{0}/train.tsv
-    validation_path: ../data/{0}/val.tsv
-    test_path: ../data/{0}/test.tsv
+    train_path: ../data/{dataset}/train.tsv
+    validation_path: ../data/{dataset}/val.tsv
+    test_path: ../data/{dataset}/test.tsv
     side_information:
       - dataloader: KGTORETSVLoader
-        kg: ../data/{0}/kgtore/kg.tsv
-  dataset: facebook_book
+        kg: ../data/{dataset}/kgtore/kg.tsv
+  dataset: {dataset}
   top_k: 10
   evaluation:
     cutoffs: [10]
@@ -25,16 +25,16 @@ experiment:
         validation_rate: 1
         validation_metric: nDCGRendle2020@10
       batch_size: 64
-      lr: 0.0005
-      plr: 0.00005
-      elr: 0.005
+      lr: [ loguniform, -9.210340372, -5.298317367]
+      plr: [ loguniform, -11.512925464970228, -6.907755278982137]
+      elr: [ loguniform, -9.210340372, -5.298317367 ]
       epochs: 200
       factors: 64
-      features: 4
-      l_w: 0.001
-      n_layers: 3
-      npr: 30
-      criterion: entropy
+      features: {features}
+      l_w: [ loguniform, -11.512925465, -2.30258509299 ]
+      n_layers: {layers}
+      npr: {npr}
+      criterion: {strategy}
       loader: KGTORETSVLoader
       seed: 123
       early_stopping:
@@ -42,3 +42,4 @@ experiment:
         mode: auto
         monitor: nDCGRendle2020@10
         verbose: True
+"""

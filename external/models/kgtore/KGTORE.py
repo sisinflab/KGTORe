@@ -26,6 +26,8 @@ class KGTORE(RecMixin, BaseRecommenderModel):
 
         self._params_list = [
             ("_lr", "lr", "lr", 0.0005, float, None),
+            ("_plr", "plr", "plr", 0.0005, float, None),
+            ("_elr", "elr", "elr", 0.0005, float, None),
             ("_factors", "factors", "factors", 64, int, None),
             ("_features", "features", "features", 64, int, None),
             ("_l_w", "l_w", "l_w", 0.01, float, None),
@@ -75,6 +77,8 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             embed_k=self._factors,
             embed_f=self._features,
             l_w=self._l_w,
+            proj_lr=self._plr,
+            edges_lr=self._elr,
             n_layers=self._n_layers,
             edge_index=self.edge_index,
             edge_features=self.edge_features,

@@ -18,15 +18,14 @@ def LoadEdgeFeatures(path, transactions):
     index_list = [i for i in indices.index for z in range(indices.iloc[i, -1])]
     edge_features.index = index_list
     counted = Counter(index_list)
-    val2 = [v for i, v in counted.items() for z in range(v)]
-    # ss = edge_features.groupby(['user', 'item']).transform(
-    #     lambda x: (np.array(range(len(x), 0, -1)) / sum(np.array(range(len(x), 0, -1)))))
-    # edge_features['val'] = abs(edge_features['val'])
-
+    val2 = [v for i, v in counted.items() for _ in range(v)]
     edge_features['val'] = edge_features['val'] / val2
 
-    # edge_features['val'] = ss['val'] * edge_features['val']
-
+    # weighted tree order
+    #ss = edge_features.groupby(['user', 'item']).transform(
+    #     lambda x: (np.array(range(len(x), 0, -1)) / sum(np.array(range(len(x), 0, -1)))))
+    #edge_features['val'] = abs(edge_features['val'])
+    #edge_features['val'] = ss['val'] * edge_features['val']
 
     # edge_features['val'] = abs(edge_features['val'])
 

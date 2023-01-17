@@ -11,23 +11,22 @@ class EdgeLayer(MessagePassing, ABC):
         super(EdgeLayer, self).__init__(aggr='add')
         self.normalize = normalize
         # self.lin = Linear(64, 64, bias=False)
-        # self.bias = Parameter(torch.Tensor(64))
-
+        # self.bias = Parameter(torch.nn.init.xavier_normal_(torch.empty(64)))
+        # self.bias = torch.nn.Parameter(torch.nn.init.xavier_normal_(torch.empty(1, 64)))
 
     def forward(self, x, edge_index, edge_attr):
 
         # x = self.lin(x)
-
         if self.normalize:
             row, col = edge_index
             deg = degree(col, x.size(0), dtype=x.dtype)
             deg_inv_sqrt = deg.pow(-0.5)
             deg_inv_sqrt[deg_inv_sqrt == float('inf')] = 0
             norm = deg_inv_sqrt[row] * deg_inv_sqrt[col]
-            return self.propagate(edge_index, x=x, norm=norm, edge_attr=edge_attr) #  + self.bias
+            return self.propagate(edge_index, x=x, norm=norm, edge_attr=edge_attr)# + self.bias
         else:
-            return self.propagate(edge_index, x=x, edge_attr=edge_attr) # + self.bias
+            return self.propagate(edge_index, x=x, edge_attr=edge_attr)# + self.bias
 
     def message(self, x_j, edge_attr):
         # return torch.unsqueeze(torch.mean(edge_attr, dim=-1), dim=-1) * x_j
-        return edge_attr * x_j
+        return torch.abs(edge_attr) * x_j
