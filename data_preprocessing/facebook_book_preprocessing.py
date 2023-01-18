@@ -50,6 +50,10 @@ def run(data_folder):
                                           folder=os.path.join(data_folder, 'kgtore'),
                                           name='kg',
                                           message='knowledge graph')
+        store_dataset(kgtore._kwargs['item_features'],
+                      folder=os.path.join(data_folder, 'kgtore'),
+                      name='item_features',
+                      message='item features')
         del kgtore
 
         kgflex = KGFlexFilter(**kwargs)

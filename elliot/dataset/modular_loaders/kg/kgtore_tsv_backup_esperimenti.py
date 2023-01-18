@@ -2,7 +2,6 @@ from types import SimpleNamespace
 import typing as t
 import numpy as np
 import pandas as pd
-import ast
 
 from elliot.dataset.modular_loaders.abstract_loader import AbstractLoader
 # forse vanno rimappati user e item dopo che sono stati mappati da dataset in questa classe
@@ -15,7 +14,6 @@ class KGTORETSVLoader(AbstractLoader):
         self.items = items
         if self.kg is not None:
             self.map_ = self.read_triplets(self.kg)  # KG
-
 
     def get_mapped(self):
         return self.users, self.items

@@ -1,6 +1,3 @@
-import pickle
-
-
 def warn(*args, **kwargs):
     pass
 
@@ -50,13 +47,6 @@ class DecisionPaths:
         dataset_path = os.path.abspath(os.path.join('./data', self.dataset_name, 'kgtore', name))
         edge_feature_df.to_csv(dataset_path, sep='\t', header=False, index=False)
 
-    def save_item_features(self):
-        # store item features
-        item_feature_name = 'item_features' + str(self.npr) + "_" + str(self.criterion) + ".pk"
-        item_features_path = os.path.abspath(os.path.join('./data', self.dataset_name, 'kgtore', item_feature_name))
-        with open(item_features_path, 'wb') as file:
-            pickle.dump(self.item_features, file)
-
     def build_if(self, kg):
         i_f = kg
         i_f['subject'] = i_f['subject'].map(self.public_items)
@@ -70,6 +60,7 @@ class DecisionPaths:
 
     def create_edge_features_matrix(self):
         edge_features = pd.DataFrame(self.edge_features)
+        self.save_edge_features_df(edge_features)
         edge_features.columns = ['user', 'item', 'feature']
         edge_features['val'] = np.sign(edge_features['feature'])
         edge_features['feature'] = np.abs(edge_features['feature'])
@@ -82,21 +73,11 @@ class DecisionPaths:
         # reindex by interaction
         indices = edge_features.groupby(['user', 'item']).size().reset_index(name='Freq')
         index_list = [i for i in indices.index for z in range(indices.iloc[i, -1])]
+        edge_features.index = index_list
         counted = Counter(index_list)
         val2 = [v for i, v in counted.items() for z in range(v)]
         edge_features['val'] = edge_features['val'] / val2
-        edge_features['interaction'] = index_list
-        self.save_edge_features_df(edge_features)
-
-        # create item features with private items and mapped features
-        self.item_features = {i: {new_mapping[f] for f in ff if f in new_mapping} for i, ff in self.i_f.items()}
-
-        # groups = edge_features[edge_features.val > 0][['item', 'feature']].groupby(['item'])
-        # self.item_features = dict(groups.apply(lambda x: set(x['feature'])))
-
-        self.save_item_features()
-
-        self.edge_features = SparseTensor(row=torch.tensor(index_list, dtype=torch.int64),
+        self.edge_features = SparseTensor(row=torch.tensor(edge_features.index, dtype=torch.int64),
                                           col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),
                                                            dtype=torch.int64),
                                           value=torch.tensor(edge_features['val'].astype(float).to_numpy(),

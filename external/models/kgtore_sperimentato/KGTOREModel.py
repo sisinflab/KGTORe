@@ -23,7 +23,6 @@ class KGTOREModel(torch.nn.Module, ABC):
                  n_layers,
                  edge_index,
                  edge_features,
-                 item_features,
                  random_seed,
                  name="KGTORE",
                  **kwargs
@@ -55,10 +54,9 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.edge_index = torch.tensor(edge_index, dtype=torch.int64)
         self.edge_features = edge_features
         self.edge_features.to(self.device)
-        self.item_features = item_features
 
         # ADDITIVE OPTIONS
-        self.alfa = 0.0
+        self.alfa = 0.1
 
         self.Gu = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embed_k))))
@@ -74,6 +72,9 @@ class KGTOREModel(torch.nn.Module, ABC):
         )
         self.F.to(self.device)
 
+        self.projection = torch.nn.Linear(self.embed_f, 1)
+        self.projection.to(self.device)
+
         propagation_network_list = []
 
         for layer in range(self.n_layers):
@@ -83,17 +84,22 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.propagation_network.to(self.device)
         self.softplus = torch.nn.Softplus()
 
+        # self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+
         self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
         self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
+        self.projection_optimizer = torch.optim.Adam(self.projection.parameters(), lr=self.projection_lr)
 
     def propagate_embeddings(self, evaluate=False):
-
         edge_embeddings = matmul(self.edge_features, self.F.to(self.device))
+
         ego_embeddings = torch.cat((self.Gu.to(self.device), self.Gi.to(self.device)), 0)
         all_embeddings = [ego_embeddings]
-        edge_embeddings = torch.cat([edge_embeddings, edge_embeddings], dim=0)
+        edge_embeddings = torch.cat([self.projection(edge_embeddings), self.projection(edge_embeddings)], dim=0)
 
-        item_features_embeddings = None
+        # user_embeddings_edge = torch.cat((self.Gu[self.edge_index[0][:self.num_interactions]], edge_embeddings), dim=1)
+        # item_embeddings_edge = torch.cat((self.Gu[self.edge_index[1][:self.num_interactions] - self.num_users], edge_embeddings), dim=1)
+        # edge_embeddings = torch.cat([self.projection(user_embeddings_edge), self.projection(item_embeddings_edge)], dim=0)
 
         for layer in range(0, self.n_layers):
             if evaluate:
@@ -121,7 +127,10 @@ class KGTOREModel(torch.nn.Module, ABC):
         gu, gi = inputs
         gamma_u = torch.squeeze(gu).to(self.device)
         gamma_i = torch.squeeze(gi).to(self.device)
+        # b_i = torch.squeeze(bi).to(self.device)
+        # xui = torch.sum(gamma_u * gamma_i, 1) + b_i
         xui = torch.sum(gamma_u * gamma_i, 1)
+
         return xui
 
     def predict(self, gu, gi, **kwargs):
@@ -139,6 +148,14 @@ class KGTOREModel(torch.nn.Module, ABC):
                                torch.norm(self.Gi, 2))
         loss = bpr_loss + reg_loss
 
+        # edge_embeddings = matmul(self.edge_features, self.F.to(self.device))
+        # edge_embeddings = torch.cat([self.projection(edge_embeddings), self.projection(edge_embeddings)], dim=0)
+
+        proj_reg_loss = self.l_w * (
+                torch.norm(self.projection.weight, 2) +
+                torch.norm(self.projection.bias, 2))
+        loss_proj = bpr_loss + proj_reg_loss
+
         # independence loss over the features within the same path
         if self.alfa > 0:
             assert self.alfa <= 1
@@ -151,12 +168,14 @@ class KGTOREModel(torch.nn.Module, ABC):
             # loss = self.alfa * ind_loss + (1-self.alfa) * bpr_loss + reg_loss
 
         self.optimizer.zero_grad()
+        self.projection_optimizer.zero_grad()
         self.edges_optimizer.zero_grad()
         loss.backward(retain_graph=True)
         if self.alfa > 0:
             ind_loss.backward(retain_graph=True)
-
+        loss_proj.backward()
         self.optimizer.step()
+        self.projection_optimizer.step()
         self.edges_optimizer.step()
 
         return loss.detach().cpu().numpy()

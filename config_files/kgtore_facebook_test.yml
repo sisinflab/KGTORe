@@ -33,7 +33,7 @@ experiment:
       features: 4
       l_w: 0.001
       n_layers: 3
-      npr: 30
+      npr: 3
       criterion: entropy
       loader: KGTORETSVLoader
       seed: 123
