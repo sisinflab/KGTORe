@@ -40,6 +40,8 @@ class KGTOREModel(torch.nn.Module, ABC):
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+        print(self.device)
+
         self.num_users = num_users
         self.num_items = num_items
         self.num_interactions = num_interactions
@@ -93,6 +95,7 @@ class KGTOREModel(torch.nn.Module, ABC):
 
     def propagate_embeddings(self, evaluate=False):
 
+        print(self.device)
 
         print(self.edge_features.device())
         print(self.F.get_device())
