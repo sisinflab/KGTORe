@@ -1,5 +1,7 @@
 import pickle
 
+import torch_sparse
+
 
 def warn(*args, **kwargs):
     pass
@@ -90,11 +92,17 @@ class DecisionPaths:
 
         # create item features with private items and mapped features
         self.item_features = {i: {new_mapping[f] for f in ff if f in new_mapping} for i, ff in self.i_f.items()}
+        row_indices = [r for i in [[k] * len(v) for k, v in self.item_features.items()] for r in i]
+        col_indices = [r for i in [v for _, v in self.item_features.items()] for r in i]
+        self.item_features = torch_sparse.SparseTensor(row=torch.tensor(row_indices, dtype=torch.int64),
+                                  col=torch.tensor(col_indices, dtype=torch.int64),
+                                  value=torch.tensor([r for i in [torch.ones(len(v)) / len(v) for _, v in self.item_features.items()] for r in i], dtype=torch.float64))
 
         # groups = edge_features[edge_features.val > 0][['item', 'feature']].groupby(['item'])
         # self.item_features = dict(groups.apply(lambda x: set(x['feature'])))
 
         self.save_item_features()
+
 
         self.edge_features = SparseTensor(row=torch.tensor(index_list, dtype=torch.int64),
                                           col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),

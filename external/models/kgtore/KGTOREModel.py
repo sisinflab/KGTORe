@@ -57,8 +57,14 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.edge_features.to(self.device)
         self.item_features = item_features
 
+        _, self.cols = self.edge_index
+        self.items = self.cols[:self.num_interactions]
+        self.items -= self.num_users
+
         # ADDITIVE OPTIONS
-        self.alfa = 0.0
+        self.a = torch.nn.Parameter(torch.rand(1))
+        self.b = torch.nn.Parameter(torch.rand(1))
+
 
         self.Gu = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embed_k))))
@@ -77,23 +83,25 @@ class KGTOREModel(torch.nn.Module, ABC):
         propagation_network_list = []
 
         for layer in range(self.n_layers):
-            propagation_network_list.append((EdgeLayer(), 'x, edge_index -> x'))
+            propagation_network_list.append((EdgeLayer(alpha=self.a, beta=self.b), 'x, edge_index -> x'))
 
         self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list)
         self.propagation_network.to(self.device)
         self.softplus = torch.nn.Softplus()
 
-        self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
-        self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        # self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
+        # self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
 
     def propagate_embeddings(self, evaluate=False):
 
-        edge_embeddings = matmul(self.edge_features, self.F.to(self.device))
+        edge_embeddings_u_i = matmul(self.edge_features, self.F.to(self.device)) * (1 - self.b)
+        edge_embeddings_i_u = matmul(self.item_features, self.F.to(self.device))[self.items] * (1-self.a)
+
         ego_embeddings = torch.cat((self.Gu.to(self.device), self.Gi.to(self.device)), 0)
         all_embeddings = [ego_embeddings]
-        edge_embeddings = torch.cat([edge_embeddings, edge_embeddings], dim=0)
+        edge_embeddings = torch.cat([edge_embeddings_u_i, edge_embeddings_i_u], dim=0)
 
-        item_features_embeddings = None
 
         for layer in range(0, self.n_layers):
             if evaluate:
