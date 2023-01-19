@@ -81,6 +81,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         )
         self.F.to(self.device)
         print('primo device')
+        print(self.device)
         print(self.edge_features.device())
         print(self.F.get_device())
 
