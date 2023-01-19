@@ -52,13 +52,13 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.n_layers = n_layers
         self.weight_size_list = [self.embedding_size] * (self.n_layers + 1)
         self.alpha = torch.tensor([1 / (k + 1) for k in range(len(self.weight_size_list))])
-        self.edge_index = torch.tensor(edge_index, dtype=torch.int64)
+        self.edge_index = torch.tensor(edge_index, dtype=torch.int64, device=self.device)
         self.edge_features = edge_features
         self.edge_features.to(self.device)
         self.item_features = item_features
         self.item_features.to(self.device)
 
-        _, self.cols = self.edge_index.clone().detach()
+        _, self.cols = self.edge_index.clone()
         self.items = self.cols[:self.num_interactions]
         self.items -= self.num_users
 
@@ -93,10 +93,8 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.propagation_network.to(self.device)
         self.softplus = torch.nn.Softplus()
 
-        #self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
-        #self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
-
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
+        self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
 
     def propagate_embeddings(self, evaluate=False):
 
@@ -172,7 +170,7 @@ class KGTOREModel(torch.nn.Module, ABC):
             ind_loss = ind_loss * self.gamma
 
         self.optimizer.zero_grad()
-        #self.edges_optimizer.zero_grad()
+        self.edges_optimizer.zero_grad()
 
         loss.backward(retain_graph=True)
         if self.gamma > 0:
@@ -180,7 +178,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         features_reg_loss.backward()
 
         self.optimizer.step()
-        #self.edges_optimizer.step()
+        self.edges_optimizer.step()
 
         return loss.detach().cpu().numpy()
 
