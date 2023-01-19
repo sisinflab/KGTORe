@@ -94,7 +94,7 @@ class KGTOREModel(torch.nn.Module, ABC):
 
         ego_embeddings = torch.cat((self.Gu, self.Gi), 0)
         all_embeddings = [ego_embeddings]
-        edge_embeddings = torch.cat([edge_embeddings_u_i, edge_embeddings_i_u], dim=0)
+        edge_embeddings = torch.cat([edge_embeddings_u_i, edge_embeddings_i_u], dim=0).to(self.device)
 
         for layer in range(0, self.n_layers):
             if evaluate:
@@ -102,13 +102,13 @@ class KGTOREModel(torch.nn.Module, ABC):
                 with torch.no_grad():
                     all_embeddings += [list(
                         self.propagation_network.children()
-                    )[layer](all_embeddings[layer].to(self.device), self.edge_index.to(self.device),
-                             edge_embeddings.to(self.device))]
+                    )[layer](all_embeddings[layer].to(self.device), self.edge_index,
+                             edge_embeddings)]
             else:
                 all_embeddings += [list(
                     self.propagation_network.children()
                 )[layer](all_embeddings[layer].to(self.device), self.edge_index.to(self.device),
-                         edge_embeddings.to(self.device))]
+                         edge_embeddings)]
 
         if evaluate:
             self.propagation_network.train()
