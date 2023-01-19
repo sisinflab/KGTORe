@@ -100,14 +100,14 @@ class KGTOREModel(torch.nn.Module, ABC):
                 self.propagation_network.eval()
                 with torch.no_grad():
                     all_embeddings += [list(
-                        self.propagation_network.children()
-                    )[layer](all_embeddings[layer], self.edge_index,
-                             edge_embeddings)]
+                        self.propagation_network.children())[layer](
+                        all_embeddings[layer], self.edge_index, edge_embeddings)
+                    ]
             else:
                 all_embeddings += [list(
-                    self.propagation_network.children()
-                )[layer](all_embeddings[layer], self.edge_index,
-                         edge_embeddings)]
+                    self.propagation_network.children())[layer](
+                    all_embeddings[layer], self.edge_index, edge_embeddings)
+                ]
 
         if evaluate:
             self.propagation_network.train()
@@ -115,17 +115,18 @@ class KGTOREModel(torch.nn.Module, ABC):
         all_embeddings = sum([all_embeddings[k] * self.alpha[k] for k in range(len(all_embeddings))])
         gu, gi = torch.split(all_embeddings, [self.num_users, self.num_items], 0)
 
-        return gu, gi
+        return gu.to(self.device), gi.to(self.device)
 
     def forward(self, inputs, **kwargs):
         gu, gi = inputs
-        gamma_u = torch.squeeze(gu).to(self.device)
-        gamma_i = torch.squeeze(gi).to(self.device)
+        gamma_u = torch.squeeze(gu)
+        print(gamma_u.get_device())
+        gamma_i = torch.squeeze(gi)
         xui = torch.sum(gamma_u * gamma_i, -1)
         return xui
 
     def predict(self, gu, gi, **kwargs):
-        return torch.matmul(gu.to(self.device), torch.transpose(gi.to(self.device), 0, 1))  # + self.bi
+        return torch.matmul(gu.to(self.device), torch.transpose(gi.to(self.device), 0, 1))
 
     def train_step(self, batch):
 
