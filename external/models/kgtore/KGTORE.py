@@ -50,8 +50,6 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             dataset_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', name))
             item_features_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', item_features_name))
             self.edge_features, self.item_features = LoadEdgeFeatures(dataset_path, item_features_path, self._data.transactions)
-            self.edge_features.to(device)
-            self.item_features.to(device)
             print("loaded edge features from: ", dataset_path, '\n')
         except:
             u_values, u_indices = np.unique(row, return_index=True)
@@ -70,8 +68,6 @@ class KGTORE(RecMixin, BaseRecommenderModel):
                                             )
             self.edge_features = Dec_Paths_class.edge_features
             self.item_features = Dec_Paths_class.item_features
-            self.edge_features.to(device)
-            self.item_features.to(device)
 
         col = [c + self._num_users for c in col]
         self.edge_index = np.array([list(row) + col, col + list(row)])
