@@ -39,7 +39,6 @@ class KGTOREModel(torch.nn.Module, ABC):
         torch.backends.cudnn.deterministic = True
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-
         print(self.device)
 
         self.num_users = num_users
@@ -94,8 +93,10 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.propagation_network.to(self.device)
         self.softplus = torch.nn.Softplus()
 
-        self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
-        self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
+        #self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
+        #self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
+
+        self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
 
     def propagate_embeddings(self, evaluate=False):
 
@@ -171,7 +172,7 @@ class KGTOREModel(torch.nn.Module, ABC):
             ind_loss = ind_loss * self.gamma
 
         self.optimizer.zero_grad()
-        self.edges_optimizer.zero_grad()
+        #self.edges_optimizer.zero_grad()
 
         loss.backward(retain_graph=True)
         if self.gamma > 0:
@@ -179,7 +180,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         features_reg_loss.backward()
 
         self.optimizer.step()
-        self.edges_optimizer.step()
+        #self.edges_optimizer.step()
 
         return loss.detach().cpu().numpy()
 
