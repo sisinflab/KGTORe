@@ -79,8 +79,8 @@ class KGTOREModel(torch.nn.Module, ABC):
         for layer in range(self.n_layers):
             propagation_network_list.append((LGConv(alpha=self.a, beta=self.b), 'x, edge_index -> x'))
 
-        self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list)
-        self.propagation_network.to(self.device)
+        self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list).to(self.device)
+        #self.propagation_network.to(self.device)
         self.softplus = torch.nn.Softplus()
 
         self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
