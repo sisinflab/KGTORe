@@ -120,13 +120,12 @@ class KGTOREModel(torch.nn.Module, ABC):
     def forward(self, inputs, **kwargs):
         gu, gi = inputs
         gamma_u = torch.squeeze(gu)
-        print(gamma_u.get_device())
         gamma_i = torch.squeeze(gi)
         xui = torch.sum(gamma_u * gamma_i, -1)
         return xui
 
     def predict(self, gu, gi, **kwargs):
-        return torch.matmul(gu.to(self.device), torch.transpose(gi.to(self.device), 0, 1))
+        return torch.matmul(gu, torch.transpose(gi, 0, 1))
 
     def train_step(self, batch):
 
