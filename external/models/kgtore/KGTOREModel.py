@@ -53,10 +53,8 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.weight_size_list = [self.embedding_size] * (self.n_layers + 1)
         self.alpha = torch.tensor([1 / (k + 1) for k in range(len(self.weight_size_list))])
         self.edge_index = torch.tensor(edge_index, dtype=torch.int64, device=self.device)
-        self.edge_features = edge_features
-        self.edge_features.to(self.device)
-        self.item_features = item_features
-        self.item_features.to(self.device)
+        self.edge_features = edge_features.to(self.device)
+        self.item_features = item_features.to(self.device)
 
         _, self.cols = self.edge_index.clone()
         self.items = self.cols[:self.num_interactions]
@@ -68,25 +66,15 @@ class KGTOREModel(torch.nn.Module, ABC):
 
         self.Gu = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embedding_size))).to(self.device), requires_grad=True)
-        print(self.Gu.get_device())
 
-        #self.Gu.to(self.device)
         self.Gi = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.num_items, self.embedding_size))).to(self.device), requires_grad=True)
-        self.Gi.to(self.device)
 
         # features matrix (for edges)
         self.feature_dim = edge_features.size(1)
         self.F = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embedding_size))).to(self.device)
         )
-        print('primo device')
-        print(self.device)
-        print('primo device')
-        print(self.device)
-        print(self.edge_features.device())
-        print(self.F.get_device())
-
         propagation_network_list = []
 
         for layer in range(self.n_layers):
@@ -96,28 +84,15 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.propagation_network.to(self.device)
         self.softplus = torch.nn.Softplus()
 
-        print('parameters')
-        print(dict(self.named_parameters()).keys())
-
         self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
         self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
 
     def propagate_embeddings(self, evaluate=False):
 
-        print(self.device)
+        edge_embeddings_u_i = matmul(self.edge_features, self.F) * (1 - self.b)
+        edge_embeddings_i_u = matmul(self.item_features, self.F)[self.items] * (1-self.a)
 
-        print(self.edge_features.device())
-        print(self.F.get_device())
-        self.F.to(self.device)
-        self.edge_features.to(self.device)
-        print(self.edge_features.device())
-        print(self.F.get_device())
-
-#        edge_embeddings_u_i = matmul(self.edge_features, self.F.to(self.device)) * (1 - self.b)
-        edge_embeddings_u_i = matmul(self.edge_features.to(self.device), self.F)
-        edge_embeddings_i_u = matmul(self.item_features.to(self.device), self.F)[self.items] * (1-self.a)
-
-        ego_embeddings = torch.cat((self.Gu.to(self.device), self.Gi.to(self.device)), 0)
+        ego_embeddings = torch.cat((self.Gu, self.Gi), 0)
         all_embeddings = [ego_embeddings]
         edge_embeddings = torch.cat([edge_embeddings_u_i, edge_embeddings_i_u], dim=0)
 
