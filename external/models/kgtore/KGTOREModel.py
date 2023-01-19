@@ -67,18 +67,17 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.b = beta
 
         self.Gu = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embedding_size))))
-        self.Gu.to(self.device)
+            torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embedding_size)))).to(self.device)
+        #self.Gu.to(self.device)
         self.Gi = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.num_items, self.embedding_size))))
         self.Gi.to(self.device)
 
         # features matrix (for edges)
         self.feature_dim = edge_features.size(1)
-        F = torch.nn.Parameter(
+        self.F = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embedding_size)))
-        )
-        self.F = F.to(self.device)
+        ).to(self.device)
         print('primo device')
         print(self.device)
         print('primo device')
