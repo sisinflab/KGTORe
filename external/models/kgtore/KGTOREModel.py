@@ -64,22 +64,23 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.b = beta
 
         self.Gu = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embedding_size))).to(self.device), requires_grad=True)
+            torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embedding_size))).to(self.device),
+            requires_grad=True)
 
         self.Gi = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.num_items, self.embedding_size))).to(self.device), requires_grad=True)
+            torch.nn.init.xavier_normal_(torch.empty((self.num_items, self.embedding_size))).to(self.device),
+            requires_grad=True)
 
         # features matrix (for edges)
         self.feature_dim = edge_features.size(1)
         self.F = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embedding_size))).to(self.device)
-        )
-        propagation_network_list = []
+            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embedding_size))).to(self.device))
 
+        propagation_network_list = []
         for layer in range(self.n_layers):
             propagation_network_list.append((LGConv(alpha=self.a, beta=self.b), 'x, edge_index -> x'))
-
         self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list).to(self.device)
+
         self.softplus = torch.nn.Softplus()
 
         self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
