@@ -63,10 +63,6 @@ def run(data_folder):
                                           folder=os.path.join(data_folder, 'kgflex'),
                                           name='kg',
                                           message='knowledge graph')
-        store_dataset(kgflex._kwargs['item_features'],
-                      folder=os.path.join(data_folder, 'kgflex'),
-                      name='item_features',
-                      message='item features')
         del kgflex
 
         kahfm = KaHFMFilter(**kwargs)
