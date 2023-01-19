@@ -42,10 +42,10 @@ for d in dataset:
                               f'beta: {beta}')
 
                         config = KGTORE_CONFIG.format(dataset=d,
-                                                      alpha=alpha,
-                                                      beta=beta,
-                                                      layers=layer,
-                                                      npr=npr,
+                                                      alpha=float(alpha),
+                                                      beta=float(beta),
+                                                      layers=int(layer),
+                                                      npr=int(npr),
                                                       strategy=c)
                         config_dir = './config_files'
                         config_path = os.path.join(config_dir, 'runtime_conf.yml')
