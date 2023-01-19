@@ -26,11 +26,12 @@ class KGTORE(RecMixin, BaseRecommenderModel):
 
         self._params_list = [
             ("_lr", "lr", "lr", 0.0005, float, None),
-            ("_plr", "plr", "plr", 0.0005, float, None),
             ("_elr", "elr", "elr", 0.0005, float, None),
             ("_factors", "factors", "factors", 64, int, None),
-            ("_features", "features", "features", 64, int, None),
             ("_l_w", "l_w", "l_w", 0.01, float, None),
+            ("_alpha", "alpha", "alpha", 0.5, float, None),
+            ("_beta", "beta", "beta", 0.5, float, None),
+            ("_gamma", "gamma", "gamma", 0.5, float, None),
             ("_n_layers", "n_layers", "n_layers", 1, int, None),
             ("_npr", "npr", "npr", 10, int, None),
             ("_criterion", "criterion", "criterion", "entropy", str, None),
@@ -77,11 +78,12 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             num_items=self._num_items,
             num_interactions=self.num_interactions,
             learning_rate=self._lr,
-            embed_k=self._factors,
-            embed_f=self._features,
-            l_w=self._l_w,
-            proj_lr=self._plr,
             edges_lr=self._elr,
+            embedding_size=self._factors,
+            l_w=self._l_w,
+            alpha=self._alpha,
+            beta=self._beta,
+            gamma=self._gamma,
             n_layers=self._n_layers,
             edge_index=self.edge_index,
             edge_features=self.edge_features,
@@ -177,5 +179,3 @@ class KGTORE(RecMixin, BaseRecommenderModel):
 
         except Exception as ex:
             raise Exception(f"Error in model restoring operation! {ex}")
-
-        return False
