@@ -95,6 +95,9 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.propagation_network.to(self.device)
         self.softplus = torch.nn.Softplus()
 
+        print('parameters')
+        print(dict(self.named_parameters()).keys())
+
         self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
         self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
 
