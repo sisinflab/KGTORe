@@ -39,7 +39,6 @@ class KGTOREModel(torch.nn.Module, ABC):
         torch.backends.cudnn.deterministic = True
 
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        print(self.device)
 
         self.num_users = num_users
         self.num_items = num_items
@@ -92,7 +91,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         edge_embeddings_u_i = matmul(self.edge_features, self.F) * (1 - self.b)
         edge_embeddings_i_u = matmul(self.item_features, self.F)[self.items] * (1-self.a)
 
-        ego_embeddings = torch.cat((self.Gu, self.Gi), 0)
+        ego_embeddings = torch.cat((self.Gu, self.Gi), 0).to(self.device)
         all_embeddings = [ego_embeddings]
         edge_embeddings = torch.cat([edge_embeddings_u_i, edge_embeddings_i_u], dim=0).to(self.device)
 
@@ -102,12 +101,12 @@ class KGTOREModel(torch.nn.Module, ABC):
                 with torch.no_grad():
                     all_embeddings += [list(
                         self.propagation_network.children()
-                    )[layer](all_embeddings[layer].to(self.device), self.edge_index,
+                    )[layer](all_embeddings[layer], self.edge_index,
                              edge_embeddings)]
             else:
                 all_embeddings += [list(
                     self.propagation_network.children()
-                )[layer](all_embeddings[layer].to(self.device), self.edge_index.to(self.device),
+                )[layer](all_embeddings[layer], self.edge_index,
                          edge_embeddings)]
 
         if evaluate:
