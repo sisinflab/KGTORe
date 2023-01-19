@@ -67,7 +67,8 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.b = beta
 
         self.Gu = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embedding_size)))).to(self.device)
+            torch.nn.init.xavier_normal_(torch.empty((self.num_users, self.embedding_size))),
+        requires_grad=True).to(self.device)
         #self.Gu.to(self.device)
         self.Gi = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.num_items, self.embedding_size))))
