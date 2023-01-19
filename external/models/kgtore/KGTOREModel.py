@@ -1,12 +1,13 @@
 from abc import ABC
 
-from .EdgeLayer import EdgeLayer
+from .EdgeLayer import EdgeLayer, LGConv
 import torch
 import torch_geometric
 import numpy as np
 import random
 from torch_sparse import matmul
 from .DecisionPaths import DecisionPaths
+# from torch_geometric.nn import LGConv
 
 
 class KGTOREModel(torch.nn.Module, ABC):
@@ -56,14 +57,18 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.edge_features = edge_features
         self.edge_features.to(self.device)
         self.item_features = item_features
+        self.item_features.to(self.device)
 
-        _, self.cols = self.edge_index
+        _, self.cols = self.edge_index.clone().detach()
         self.items = self.cols[:self.num_interactions]
         self.items -= self.num_users
+        self.alfa = 0
 
         # ADDITIVE OPTIONS
-        self.a = torch.nn.Parameter(torch.rand(1))
-        self.b = torch.nn.Parameter(torch.rand(1))
+        # self.a = torch.nn.Parameter(torch.rand(1))
+        # self.b = torch.nn.Parameter(torch.rand(1))
+        self.a = 0.5
+        self.b = 0.5
 
 
         self.Gu = torch.nn.Parameter(
@@ -76,20 +81,20 @@ class KGTOREModel(torch.nn.Module, ABC):
         # features matrix (for edges)
         self.feature_dim = edge_features.size(1)
         self.F = torch.nn.Parameter(
-            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embed_f)))
+            torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embed_k)))
         )
         self.F.to(self.device)
 
         propagation_network_list = []
 
         for layer in range(self.n_layers):
-            propagation_network_list.append((EdgeLayer(alpha=self.a, beta=self.b), 'x, edge_index -> x'))
+            propagation_network_list.append((LGConv(alpha=self.a, beta=self.b), 'x, edge_index -> x'))
 
         self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list)
         self.propagation_network.to(self.device)
         self.softplus = torch.nn.Softplus()
 
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
         # self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
         # self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
 
@@ -129,7 +134,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         gu, gi = inputs
         gamma_u = torch.squeeze(gu).to(self.device)
         gamma_i = torch.squeeze(gi).to(self.device)
-        xui = torch.sum(gamma_u * gamma_i, 1)
+        xui = torch.sum(gamma_u * gamma_i, -1)
         return xui
 
     def predict(self, gu, gi, **kwargs):
@@ -148,24 +153,24 @@ class KGTOREModel(torch.nn.Module, ABC):
         loss = bpr_loss + reg_loss
 
         # independence loss over the features within the same path
-        if self.alfa > 0:
-            assert self.alfa <= 1
-            n_edges = self.edge_features.size(0)
-            n_selected_edges = int(n_edges * 0.01)
-            selected_edges = random.sample(list(range(n_edges)), n_selected_edges)
-            ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_features[e].storage._col])).sum() - len(
-                self.edge_features[e].storage._col) for e in selected_edges]
-            ind_loss = sum(ind_loss) / n_selected_edges + self.l_w * (torch.norm(self.F, 2))
-            # loss = self.alfa * ind_loss + (1-self.alfa) * bpr_loss + reg_loss
+        # if self.alfa > 0:
+        #     assert self.alfa <= 1
+        #     n_edges = self.edge_features.size(0)
+        #     n_selected_edges = int(n_edges * 0.01)
+        #     selected_edges = random.sample(list(range(n_edges)), n_selected_edges)
+        #     ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_features[e].storage._col])).sum() - len(
+        #         self.edge_features[e].storage._col) for e in selected_edges]
+        #     ind_loss = sum(ind_loss) / n_selected_edges + self.l_w * (torch.norm(self.F, 2))
+        #     # loss = self.alfa * ind_loss + (1-self.alfa) * bpr_loss + reg_loss
 
         self.optimizer.zero_grad()
-        self.edges_optimizer.zero_grad()
-        loss.backward(retain_graph=True)
-        if self.alfa > 0:
-            ind_loss.backward(retain_graph=True)
+        # self.edges_optimizer.zero_grad()
+        loss.backward()#retain_graph=True)
+        # if self.alfa > 0:
+        #     ind_loss.backward(retain_graph=True)
 
         self.optimizer.step()
-        self.edges_optimizer.step()
+        # self.edges_optimizer.step()
 
         return loss.detach().cpu().numpy()
 
