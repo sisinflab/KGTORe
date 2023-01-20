@@ -153,7 +153,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.optimizer.zero_grad()
         #self.edges_optimizer.zero_grad()
 
-        loss.backward(retain_graph=True)
+        loss.backward()
         #if self.gamma > 0:
         #    ind_loss.backward(retain_graph=True)
         #features_reg_loss.backward()
