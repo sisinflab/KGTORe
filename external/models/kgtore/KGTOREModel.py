@@ -88,7 +88,7 @@ class KGTOREModel(torch.nn.Module, ABC):
 
         self.n_selected_edges = int(self.num_interactions * 0.001)
         self.edge_path = {e: self.edge_features[e].storage._col for e in range(self.edge_features.size(0))}
-        self.edge_len = {e: len(e) for e in self.edge_path}
+        self.edge_len = {e: len(p) for e, p in self.edge_path.items()}
 
         # self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
 
