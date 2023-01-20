@@ -1,14 +1,14 @@
 from elliot.run import run_experiment
-from config_kgtore import KGTORE_CONFIG
+from config_kgtore_trees import KGTORE_CONFIG
 import argparse
 import os
 
 parser = argparse.ArgumentParser(description="Run sample main.")
-parser.add_argument('--dataset', type=str, nargs='+', default=['facebook_book'])
+parser.add_argument('--dataset', type=str, nargs='+', default=['movielens'])
 parser.add_argument('--npr', type=str, nargs='+', default=[10, 30, 40])
-parser.add_argument('--layer', type=str, nargs='+', default=[3, 2])
-parser.add_argument('--alpha', type=str, nargs='+', default=[0.2, 0.4, 0.6, 0.8])
-parser.add_argument('--beta', type=str, nargs='+', default=[0.2, 0.4, 0.6, 0.8])
+parser.add_argument('--layer', type=str, nargs='+', default=[3])
+parser.add_argument('--alpha', type=str, nargs='+', default=[0.2])
+parser.add_argument('--beta', type=str, nargs='+', default=[0.2])
 parser.add_argument('--criterion', type=str, nargs='+', default=['entropy', 'gini'])
 parser.add_argument('--gpu', type=int, default=0)
 args = parser.parse_args()

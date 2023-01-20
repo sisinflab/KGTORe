@@ -18,7 +18,7 @@ KGTORE_CONFIG = """experiment:
   models:
     external.KGTORE:
       meta:
-        hyper_max_evals: 20
+        hyper_max_evals: 1
         hyper_opt_alg: tpe
         verbose: True
         save_recs: False
@@ -30,7 +30,7 @@ KGTORE_CONFIG = """experiment:
       alpha: {alpha}
       beta: {beta}
       gamma: [ uniform, 0, 1]
-      epochs: 200
+      epochs: 1
       factors: 64
       l_w: [ loguniform, -11.512925465, -2.30258509299 ]
       n_layers: {layers}
