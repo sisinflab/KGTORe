@@ -84,13 +84,17 @@ class KGTOREModel(torch.nn.Module, ABC):
 
         self.softplus = torch.nn.Softplus()
 
-        self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+        self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
+        self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
 
         self.n_selected_edges = int(self.num_interactions * 0.001)
-        self.edge_path = {e: self.edge_features[e].storage._col for e in range(self.edge_features.size(0))}
-        self.edge_len = {e: len(p) for e, p in self.edge_path.items()}
 
-        # self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
+        self.edge_path = dict()
+        self.edge_len = dict()
+        for e in range(self.edge_features.size(0)):
+            self.edge_path[e] = self.edge_features[e].storage._col
+            self.edge_len[e] = len(self.edge_path[e])
+
 
     def propagate_embeddings(self, evaluate=False):
 
@@ -135,7 +139,6 @@ class KGTOREModel(torch.nn.Module, ABC):
 
     def train_step(self, batch):
 
-
         gu, gi = self.propagate_embeddings()
         user, pos, neg = batch
         xu_pos = self.forward(inputs=(gu[user[:, 0]], gi[pos[:, 0]]))
@@ -147,24 +150,23 @@ class KGTOREModel(torch.nn.Module, ABC):
         features_reg_loss = self.l_w * torch.norm(self.F, 2)
 
         # independence loss over the features within the same path
-
         if self.gamma > 0:
             selected_edges = random.sample(list(range(self.num_interactions)), self.n_selected_edges)
             ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_path[e]])).sum() - self.edge_len[e] for e in selected_edges]
             ind_loss = sum(ind_loss) / self.n_selected_edges
             ind_loss = ind_loss * self.gamma
 
-        loss = bpr_loss + reg_loss + features_reg_loss + ind_loss
+        loss = bpr_loss + reg_loss
         self.optimizer.zero_grad()
-        #self.edges_optimizer.zero_grad()
+        self.edges_optimizer.zero_grad()
 
-        loss.backward()
-        #if self.gamma > 0:
-        #    ind_loss.backward(retain_graph=True)
-        #features_reg_loss.backward()
+        loss.backward(retain_graph=True)
+        if self.gamma > 0:
+            ind_loss.backward(retain_graph=True)
+        features_reg_loss.backward()
 
         self.optimizer.step()
-        #self.edges_optimizer.step()
+        self.edges_optimizer.step()
 
         return loss.detach().cpu().numpy()
 
