@@ -41,12 +41,21 @@ for d in dataset:
                               f'alpha: {alpha}\n'
                               f'beta: {beta}')
 
+                        assert d in ['facebook_book', 'movielens', 'yahoo_movies']
+
+                        batch_sizes = {'facebook_book': 64,
+                                       'movielens': 2048,
+                                       'yahoo_movies': 256}
+
+                        batch = batch_sizes[d]
+
                         config = KGTORE_CONFIG.format(dataset=d,
                                                       alpha=float(alpha),
                                                       beta=float(beta),
                                                       layers=int(layer),
                                                       npr=int(npr),
-                                                      strategy=c)
+                                                      strategy=c,
+                                                      batch=batch)
                         config_dir = './config_files'
                         config_path = os.path.join(config_dir, 'runtime_conf.yml')
                         with open(config_path, 'w') as file:
