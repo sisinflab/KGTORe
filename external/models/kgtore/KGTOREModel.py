@@ -6,6 +6,7 @@ import torch_geometric
 import numpy as np
 import random
 from torch_sparse import matmul
+import time
 
 
 class KGTOREModel(torch.nn.Module, ABC):
@@ -88,8 +89,11 @@ class KGTOREModel(torch.nn.Module, ABC):
 
     def propagate_embeddings(self, evaluate=False):
 
+        start_edge_embeddings = time.time()
         edge_embeddings_u_i = matmul(self.edge_features, self.F) * (1 - self.b)
         edge_embeddings_i_u = matmul(self.item_features, self.F)[self.items] * (1-self.a)
+        end_edge_embeddings = time.time()
+        print(f'time for computing edge embeddings {end_edge_embeddings - start_edge_embeddings}')
 
         ego_embeddings = torch.cat((self.Gu, self.Gi), 0).to(self.device)
         all_embeddings = [ego_embeddings]
@@ -129,6 +133,7 @@ class KGTOREModel(torch.nn.Module, ABC):
 
     def train_step(self, batch):
 
+
         gu, gi = self.propagate_embeddings()
         user, pos, neg = batch
         xu_pos = self.forward(inputs=(gu[user[:, 0]], gi[pos[:, 0]]))
@@ -142,7 +147,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         # independence loss over the features within the same path
         if self.gamma > 0:
             n_edges = self.edge_features.size(0)
-            n_selected_edges = int(n_edges * 0.01)
+            n_selected_edges = int(n_edges * 0.001)
             selected_edges = random.sample(list(range(n_edges)), n_selected_edges)
             ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_features[e].storage._col])).sum() - len(
                 self.edge_features[e].storage._col) for e in selected_edges]
