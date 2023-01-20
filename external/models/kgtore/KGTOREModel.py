@@ -85,6 +85,11 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.softplus = torch.nn.Softplus()
 
         self.optimizer = torch.optim.Adam(self.parameters(), lr=self.learning_rate)
+
+        self.n_selected_edges = int(self.num_interactions * 0.001)
+        self.edge_path = {e: self.edge_features[e].storage._col for e in range(self.edge_features.size(0))}
+        self.edge_len = {e: len(e) for e in self.edge_path}
+
         # self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
 
     def propagate_embeddings(self, evaluate=False):
@@ -145,13 +150,11 @@ class KGTOREModel(torch.nn.Module, ABC):
         features_reg_loss = self.l_w * torch.norm(self.F, 2)
 
         # independence loss over the features within the same path
+
         if self.gamma > 0:
-            n_edges = self.edge_features.size(0)
-            n_selected_edges = int(n_edges * 0.001)
-            selected_edges = random.sample(list(range(n_edges)), n_selected_edges)
-            ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_features[e].storage._col])).sum() - len(
-                self.edge_features[e].storage._col) for e in selected_edges]
-            ind_loss = sum(ind_loss) / n_selected_edges
+            selected_edges = random.sample(list(range(self.num_interactions)), self.n_selected_edges)
+            ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_path[e]])).sum() - self.edge_len[e] for e in selected_edges]
+            ind_loss = sum(ind_loss) / self.n_selected_edges
             ind_loss = ind_loss * self.gamma
 
         loss = bpr_loss + reg_loss + features_reg_loss + ind_loss
