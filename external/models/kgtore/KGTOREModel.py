@@ -149,7 +149,7 @@ class KGTOREModel(torch.nn.Module, ABC):
             ind_loss = sum(ind_loss) / n_selected_edges
             ind_loss = ind_loss * self.gamma
 
-        loss = bpr_loss + reg_loss + features_reg_loss + ind_loss
+        loss = bpr_loss + reg_loss + features_reg_loss #+ ind_loss
         self.optimizer.zero_grad()
         #self.edges_optimizer.zero_grad()
 
