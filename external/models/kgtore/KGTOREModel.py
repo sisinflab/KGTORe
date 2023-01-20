@@ -21,6 +21,7 @@ class KGTOREModel(torch.nn.Module, ABC):
                  alpha,
                  beta,
                  gamma,
+                 ind_edges,
                  n_layers,
                  edge_index,
                  edge_features,
@@ -87,7 +88,8 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.optimizer = torch.optim.Adam([self.Gu, self.Gi], lr=self.learning_rate)
         self.edges_optimizer = torch.optim.Adam([self.F], lr=self.edges_lr)
 
-        self.n_selected_edges = int(self.num_interactions * 0.001)
+        self.ind_edges = ind_edges
+        self.n_selected_edges = int(self.num_interactions * self.ind_edges)
 
         self.edge_path = dict()
         self.edge_len = dict()
@@ -153,8 +155,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         if self.gamma > 0:
             selected_edges = random.sample(list(range(self.num_interactions)), self.n_selected_edges)
             ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_path[e]])).sum() - self.edge_len[e] for e in selected_edges]
-            ind_loss = sum(ind_loss) / self.n_selected_edges
-            ind_loss = ind_loss * self.gamma
+            ind_loss = sum(ind_loss) / self.n_selected_edges * self.gamma
 
         loss = bpr_loss + reg_loss
         self.optimizer.zero_grad()

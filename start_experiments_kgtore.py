@@ -49,6 +49,10 @@ for d in dataset:
                                        'movielens': 2048,
                                        'yahoo_movies': 256}
 
+                        ind_edges = {'facebook_book': 0.01,
+                                       'movielens': 0.001,
+                                       'yahoo_movies': 0.01}
+
                         batch = batch_sizes[d]
 
                         config = KGTORE_CONFIG.format(dataset=d,
@@ -58,7 +62,8 @@ for d in dataset:
                                                       npr=int(npr),
                                                       strategy=c,
                                                       batch=batch,
-                                                      gpu=int(gpu))
+                                                      gpu=int(gpu),
+                                                      ind_edges=float(ind_edges[d]))
                         config_dir = './config_files'
                         config_path = os.path.join(config_dir, 'runtime_conf.yml')
                         with open(config_path, 'w') as file:
