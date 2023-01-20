@@ -94,11 +94,8 @@ class KGTOREModel(torch.nn.Module, ABC):
 
     def propagate_embeddings(self, evaluate=False):
 
-        start_edge_embeddings = time.time()
         edge_embeddings_u_i = matmul(self.edge_features, self.F) * (1 - self.b)
         edge_embeddings_i_u = matmul(self.item_features, self.F)[self.items] * (1-self.a)
-        end_edge_embeddings = time.time()
-        print(f'time for computing edge embeddings {end_edge_embeddings - start_edge_embeddings}')
 
         ego_embeddings = torch.cat((self.Gu, self.Gi), 0).to(self.device)
         all_embeddings = [ego_embeddings]
