@@ -7,7 +7,7 @@ KGTORE_CONFIG = """experiment:
     test_path: ../data/{dataset}/test.tsv
     side_information:
       - dataloader: KGTORETSVLoader
-        kg: ../data/{dataset}/kgtore/kg.tsv
+        kg: ../data/{dataset}/kgin/kg.tsv
   dataset: {dataset}
   top_k: 10
   evaluation:
