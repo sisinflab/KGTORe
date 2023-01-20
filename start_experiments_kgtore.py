@@ -10,6 +10,7 @@ parser.add_argument('--layer', type=str, nargs='+', default=[3, 2])
 parser.add_argument('--alpha', type=str, nargs='+', default=[0.2, 0.4, 0.6, 0.8])
 parser.add_argument('--beta', type=str, nargs='+', default=[0.2, 0.4, 0.6, 0.8])
 parser.add_argument('--criterion', type=str, nargs='+', default=['entropy', 'gini'])
+parser.add_argument('--gpu', type=int, default=0)
 args = parser.parse_args()
 
 nprs = args.npr
@@ -18,6 +19,7 @@ layers = args.layer
 dataset = args.dataset
 alphas = args.alpha
 betas = args.beta
+gpu = args.gpu
 
 print('Exploration of parameters:\n'
       f'npr: {nprs}\n'
@@ -55,7 +57,8 @@ for d in dataset:
                                                       layers=int(layer),
                                                       npr=int(npr),
                                                       strategy=c,
-                                                      batch=batch)
+                                                      batch=batch,
+                                                      gpu=int(gpu))
                         config_dir = './config_files'
                         config_path = os.path.join(config_dir, 'runtime_conf.yml')
                         with open(config_path, 'w') as file:

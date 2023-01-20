@@ -13,7 +13,7 @@ KGTORE_CONFIG = """experiment:
   evaluation:
     cutoffs: [10]
     simple_metrics: [nDCGRendle2020]
-  gpu: 0
+  gpu: {gpu}
   external_models_path: ../external/models/__init__.py
   models:
     external.KGTORE:
