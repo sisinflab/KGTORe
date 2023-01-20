@@ -50,6 +50,8 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             item_features_name = 'item_features' + str(self._npr) + "_" + str(self._criterion) + ".pk"
             dataset_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', name))
             item_features_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', item_features_name))
+            print(f'Looking for {dataset_path}')
+            print(f'Looking for {item_features_path}')
             self.edge_features, self.item_features = LoadEdgeFeatures(dataset_path, item_features_path, self._data.transactions)
             print("loaded edge features from: ", dataset_path, '\n')
         except:
