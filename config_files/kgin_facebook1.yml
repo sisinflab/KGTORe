@@ -18,7 +18,7 @@ experiment:
   models:
     KGIN:
       meta:
-        hyper_max_evals: 20
+        hyper_max_evals: 5
         hyper_opt_alg: tpe
         verbose: True
         save_recs: False
