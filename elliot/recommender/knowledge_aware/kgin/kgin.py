@@ -44,6 +44,8 @@ class KGIN(RecMixin, BaseRecommenderModel):
             ("_loader", "loader", "loader", "KGINTSVLoader", None, None)
         ]
 
+        np.random.seed(42)
+
         self.autoset_params()
 
         self._ratings = self._data.train_dict
