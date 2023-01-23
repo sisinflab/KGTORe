@@ -13,6 +13,7 @@ from tqdm import tqdm
 import networkx as nx
 import math
 from collections import defaultdict
+import random
 
 from elliot.dataset.samplers import custom_sampler as cs
 from elliot.recommender import BaseRecommenderModel
@@ -45,6 +46,7 @@ class KGIN(RecMixin, BaseRecommenderModel):
         ]
 
         np.random.seed(42)
+        random.seed(42)
 
         self.autoset_params()
 
