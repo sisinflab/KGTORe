@@ -274,8 +274,6 @@ class KGINModel(keras.Model):
     # @tf.function
     def _get_edges(self, graph):
         graph_tensor = tf.constant(list(graph.edges))  # [-1, 3]
-        print(graph.edges)
-        exit()
         index = graph_tensor[:, :-1]  # [-1, 2]
         type = graph_tensor[:, -1]  # [-1, 1]
         return tf.cast(tf.transpose(index), dtype=tf.int32), tf.cast(type, dtype=tf.int32)
