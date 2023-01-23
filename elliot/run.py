@@ -36,6 +36,7 @@ print(u'''
          ''')
 
 def run_experiment(config_path: str = ''):
+    print(f'Reading configuration file at \'{config_path}\'')
     builder = NameSpaceBuilder(config_path, here, path.abspath(path.dirname(config_path)))
     base = builder.base
     config_test(builder, base)
