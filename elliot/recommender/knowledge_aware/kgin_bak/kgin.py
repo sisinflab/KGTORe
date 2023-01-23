@@ -43,7 +43,6 @@ class KGIN(RecMixin, BaseRecommenderModel):
             ("_ind", "ind", "ind", "distance", str, None),    # independence modeling: mi, distance, cosine
             ("_loader", "loader", "loader", "KGINTSVLoader", None, None)
         ]
-
         self.autoset_params()
 
         self._ratings = self._data.train_dict
