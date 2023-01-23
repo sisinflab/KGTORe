@@ -85,7 +85,7 @@ class LGConv(MessagePassing):
         pass
 
     def forward(self, x: Tensor, edge_index: Adj,
-                edge_attr: OptTensor = None) -> Tensor:
+                edge_attr: OptTensor = None, edge_attr_weight: OptTensor = None) -> Tensor:
 
         if self.normalize and isinstance(edge_index, Tensor):
             out = gcn_norm(edge_index, None, x.size(self.node_dim),
@@ -97,14 +97,14 @@ class LGConv(MessagePassing):
                                   dtype=x.dtype)
 
         # propagate_type: (x: Tensor, edge_weight: OptTensor)
-        return self.propagate(edge_index, x=x, edge_weight=edge_weight, edge_attr=edge_attr,
+        return self.propagate(edge_index, x=x, edge_weight=edge_weight, edge_attr=edge_attr, edge_attr_weight=edge_attr_weight,
                               size=None)
 
-    def message(self, x_j: Tensor, edge_weight, edge_attr: OptTensor) -> Tensor:
+    def message(self, x_j: Tensor, edge_weight, edge_attr: OptTensor, edge_attr_weight: OptTensor) -> Tensor:
         num_trans = x_j.shape[0] // 2
         x_j[:num_trans] = x_j[:num_trans] * self.beta
         x_j[num_trans:] = x_j[num_trans:] * self.alpha
-        return edge_attr + torch.mul(x_j, edge_weight.reshape(-1, 1))
+        return (edge_attr_weight.reshape(-1, 1) * edge_attr) + torch.mul(x_j, edge_weight.reshape(-1, 1))
 
     def message_and_aggregate(self, adj_t: SparseTensor, x: Tensor) -> Tensor:
         return matmul(adj_t, x, reduce=self.aggr)
