@@ -221,7 +221,6 @@ class KGINModel(keras.Model):
                  **kwargs):
         super().__init__(name=name, **kwargs)
         tf.random.set_seed(random_seed)
-        tf.keras.utils.set_random_seed(random_seed)
         tf.config.experimental.enable_op_determinism()
 
         self.n_users = n_users
