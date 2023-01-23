@@ -2,7 +2,7 @@ from data_preprocessing.filters import *
 from data_preprocessing.filters.basic import IterativeKCore, KCore
 from collections import Counter
 import pandas as pd
-
+import numpy as np
 
 class FilterKG(Filter):
     def __init__(self, kg: pd.DataFrame, rare_obj_threshold=3, min_obj_threshold=10, **kwargs):
@@ -58,8 +58,11 @@ class MapKG(Filter):
         self._map = linking.copy()
 
     def filter_engine(self):
-        entities = set.union(set(self._kg.s), set(self._kg.o))
-        predicates = set(self._kg.p)
+        #entities = set.union(set(self._kg.s), set(self._kg.o))
+        entities = np.unique(np.concatenate([self._kg.s, self._kg.o]))
+
+        predicates = self._kg.p.unique()
+
         predicates_mapping = dict(zip(predicates, range(len(predicates))))
         uri_item_map = dict(zip(self._map.e, self._map.i))
 
