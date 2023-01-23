@@ -65,7 +65,7 @@ class GraphConv:
     """
     def __init__(self, channel, n_hops, n_users,
                  n_factors, n_relations, interact_mat,
-                 ind, node_dropout_rate=0.5, mess_dropout_rate=0.1):
+                 ind, node_dropout_rate=0.5, mess_dropout_rate=0.1, random_seed=42):
         super(GraphConv, self).__init__()
 
         self.convs = []
@@ -79,7 +79,7 @@ class GraphConv:
 
         self.temperature = 0.2
 
-        self.initializer = tf.initializers.GlorotUniform()
+        self.initializer = tf.initializers.GlorotUniform(seed=random_seed)
 
         self.weight = tf.Variable(self.initializer(shape=[n_relations - 1, channel]))
         self.disen_weight_att = tf.Variable(self.initializer(shape=[n_factors, n_relations - 1]))
@@ -244,7 +244,7 @@ class KGINModel(keras.Model):
         self.graph = graph
         self.edge_index, self.edge_type = self._get_edges(graph)
 
-        self.initializer = tf.initializers.GlorotUniform()
+        self.initializer = tf.initializers.GlorotUniform(seed=random_seed)
         self.all_embed = tf.Variable(self.initializer(shape=[self.n_nodes, self.emb_size]))
         self.latent_emb = tf.Variable(self.initializer(shape=[self.n_factors, self.emb_size]))
 
@@ -261,7 +261,8 @@ class KGINModel(keras.Model):
                              interact_mat=self.interact_mat,
                              ind=self.ind,
                              node_dropout_rate=self.node_dropout_rate,
-                             mess_dropout_rate=self.mess_dropout_rate)
+                             mess_dropout_rate=self.mess_dropout_rate,
+                             random_seed=random_seed)
 
         self.optimizer = tf.optimizers.Adam(self.lr)
 
