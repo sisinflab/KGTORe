@@ -18,7 +18,7 @@ experiment:
   models:
     KGIN:
       meta:
-        hyper_max_evals: 5
+        hyper_max_evals: 20
         hyper_opt_alg: tpe
         verbose: True
         save_recs: True
@@ -26,7 +26,7 @@ experiment:
         validation_metric: nDCGRendle2020@10
       lr: [ loguniform, -9.210340372, -5.298317367 ]
       batch_size: 64
-      epochs: 1
+      epochs: 200
       l2: [ loguniform, -11.512925465, -2.30258509299 ]
       lfr: [ loguniform, -11.512925465, -2.30258509299 ]
       emb: 64
