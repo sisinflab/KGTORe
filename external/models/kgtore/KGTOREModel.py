@@ -7,6 +7,7 @@ import numpy as np
 import random
 from torch_sparse import matmul
 import time
+from torch_scatter import scatter_add
 
 
 class KGTOREModel(torch.nn.Module, ABC):
@@ -61,6 +62,12 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.items = self.cols[:self.num_interactions]
         self.items -= self.num_users
 
+        row = self.edge_index[0]
+        deg = scatter_add(torch.ones((self.edge_index.size(1), )), row, dim=0, dim_size=(self.edge_index.max() + 1))
+        deg_inv = deg.pow_(-1)
+        deg_inv.masked_fill_(deg_inv == float('inf'), 0)
+        self.edge_attr_weight = deg_inv[row]
+
         # ADDITIVE OPTIONS
         self.a = alpha
         self.b = beta
@@ -113,12 +120,12 @@ class KGTOREModel(torch.nn.Module, ABC):
                 with torch.no_grad():
                     all_embeddings += [list(
                         self.propagation_network.children())[layer](
-                        all_embeddings[layer], self.edge_index, edge_embeddings)
+                        all_embeddings[layer], self.edge_index, edge_embeddings, self.edge_attr_weight)
                     ]
             else:
                 all_embeddings += [list(
                     self.propagation_network.children())[layer](
-                    all_embeddings[layer], self.edge_index, edge_embeddings)
+                    all_embeddings[layer], self.edge_index, edge_embeddings, self.edge_attr_weight)
                 ]
 
         if evaluate:
