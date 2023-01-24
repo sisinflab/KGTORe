@@ -25,8 +25,8 @@ experiment:
         validation_rate: 1
         validation_metric: nDCGRendle2020@10
       batch_size: 64
-      lr: 0.00137808293708113
-      elr: 0.044397725956643866
+      lr: 0.000137808293708113
+      elr: 0.0044397725956643866
       epochs: 200
       factors: 64
       l_w: 0.03335537145355732
