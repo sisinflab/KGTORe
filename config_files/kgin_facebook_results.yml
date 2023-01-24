@@ -20,10 +20,10 @@ experiment:
       meta:
         verbose: True
         save_recs: True
-        validation_rate: 22
+        validation_rate: 20
       lr: 0.0004974556005249158
       batch_size: 64
-      epochs: 22
+      epochs: 20
       l2: 0.053885509726367936
       lfr: 0.008145222883360741
       emb: 64
