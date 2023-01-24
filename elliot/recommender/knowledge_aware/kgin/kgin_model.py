@@ -22,7 +22,7 @@ class Aggregator:
         self.n_users = n_users
         self.n_factors = n_factors
 
-    # # @tf.function
+    # @tf.function
     def call(self, entity_emb, user_emb, latent_emb,
                 edge_index, edge_type, interact_mat,
                 weight, disen_weight_att):
@@ -89,7 +89,7 @@ class GraphConv:
 
         self.dropout = tf.keras.layers.Dropout(rate=mess_dropout_rate, seed=random_seed)  # mess dropout
 
-    # # @tf.function
+    # @tf.function
     def _edge_sampling(self, edge_index, edge_type, rate=0.5):
         # edge_index: [2, -1]
         # edge_type: [-1]
@@ -99,7 +99,7 @@ class GraphConv:
                          :tf.cast(tf.multiply(rate, tf.cast(n_edges, dtype=tf.float32)), dtype=tf.int64)]
         return tf.gather(edge_index, random_indices, axis=1), tf.gather(edge_type, random_indices)
 
-    # @tf.function
+    @tf.function
     def _sparse_dropout(self, x, rate=0.5):
         noise_shape = len(x.values)
 
@@ -115,7 +115,7 @@ class GraphConv:
         out = tf.SparseTensor(i, v, tf.cast(tf.shape(x), dtype=tf.int64))
         return out * tf.constant(1. / (1 - rate), dtype=tf.float32)
 
-    # @tf.function
+    @tf.function
     def _cul_cor(self):
         def cosine_similarity(tensor_1, tensor_2):
             # tensor_1, tensor_2: [channel]
@@ -173,7 +173,7 @@ class GraphConv:
                         cor += cosine_similarity(self.disen_weight_att[i], self.disen_weight_att[j])
         return cor
 
-    # @tf.function
+    @tf.function
     def call(self, user_emb, entity_emb, latent_emb, edge_index, edge_type,
                 interact_mat, mess_dropout=True, node_dropout=False):
 
@@ -266,19 +266,19 @@ class KGINModel(keras.Model):
 
         self.optimizer = tf.optimizers.Adam(self.lr)
 
-    # @tf.function
+    @tf.function
     def _get_indices(self, X):
         coo = X.tocoo()
         return tf.transpose(tf.constant([coo.row, coo.col], dtype=tf.int32))  # [-1, 2]
 
-    # @tf.function
+    @tf.function
     def _get_edges(self, graph):
         graph_tensor = tf.constant(list(graph.edges))  # [-1, 3]
         index = graph_tensor[:, :-1]  # [-1, 2]
         type = graph_tensor[:, -1]  # [-1, 1]
         return tf.cast(tf.transpose(index), dtype=tf.int32), tf.cast(type, dtype=tf.int32)
 
-    # @tf.function
+    @tf.function
     def call(self, inputs, training=None, **kwargs):
         # user = batch['users']
         # pos_item = batch['pos_items']
@@ -305,7 +305,7 @@ class KGINModel(keras.Model):
 
         return pos_scores, neg_scores, u_e, pos_e, neg_e, cor
 
-    # @tf.function
+    @tf.function
     def train_step(self, batch):
         user, pos, neg = batch
         with tf.GradientTape() as tape:
@@ -339,13 +339,13 @@ class KGINModel(keras.Model):
 
         return loss
 
-    # @tf.function
+    @tf.function
     def predict_batch(self, entity_gcn_emb, user_gcn_emb, offset, offset_stop):
         u_g_embeddings = user_gcn_emb[offset:offset_stop]
         return self.rating(u_g_embeddings, entity_gcn_emb[:self.n_items])
 
 
-    # @tf.function
+    @tf.function
     def generate(self):
         user_emb = self.all_embed[:self.n_users, :]
         item_emb = self.all_embed[self.n_users:, :]
@@ -357,11 +357,11 @@ class KGINModel(keras.Model):
                              self.interact_mat,
                              mess_dropout=False, node_dropout=False)[:-1]
 
-    # @tf.function
+    @tf.function
     def rating(self, u_g_embeddings, i_g_embeddings):
         return tf.matmul(u_g_embeddings, tf.transpose(i_g_embeddings))
 
-    # @tf.function
+    @tf.function
     def get_top_k(self, predictions, train_mask, k=100):
         return tf.nn.top_k(tf.where(train_mask, predictions, -np.inf), k=k, sorted=True)
 
