@@ -63,7 +63,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.items -= self.num_users
 
         row = self.edge_index[0]
-        deg = scatter_add(torch.ones((self.edge_index.size(1), )), row, dim=0, dim_size=(self.edge_index.max() + 1))
+        deg = scatter_add(torch.ones((self.edge_index.size(1), ), device=self.device), row, dim=0, dim_size=(self.edge_index.max() + 1))
         deg_inv = deg.pow_(-1)
         deg_inv.masked_fill_(deg_inv == float('inf'), 0)
         self.edge_attr_weight = deg_inv[row]
