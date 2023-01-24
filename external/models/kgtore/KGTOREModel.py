@@ -157,7 +157,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         bpr_loss = torch.sum(self.softplus(-difference))
         reg_loss = self.l_w * (torch.norm(self.Gu, 2) +
                                torch.norm(self.Gi, 2))
-        features_reg_loss = self.l_w * torch.norm(self.F, 2)
+        features_reg_loss = self.l_w*2 * torch.norm(self.F, 2)
 
         # independence loss over the features within the same path
         if self.gamma > 0:
