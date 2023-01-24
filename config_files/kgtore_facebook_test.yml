@@ -30,8 +30,8 @@ experiment:
       epochs: 200
       factors: 64
       l_w: 0.03335537145355732
-      alpha: 0.5
-      beta: 0.5
+      alpha: 0.8
+      beta: 0.2
       gamma: 0
       n_layers: 3
       npr: 40
