@@ -67,6 +67,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         deg_inv = deg.pow_(-1)
         deg_inv.masked_fill_(deg_inv == float('inf'), 0)
         self.edge_attr_weight = deg_inv[row]
+        self.edge_attr_weight[num_interactions:] = 1.
 
         # ADDITIVE OPTIONS
         self.a = alpha
