@@ -29,7 +29,7 @@ experiment:
       elr: 0.0044397725956643866
       epochs: 200
       factors: 64
-      l_w: 0.03335537145355732
+      l_w: 0.3335537145355732
       alpha: 0.8
       beta: 0.2
       gamma: 0
