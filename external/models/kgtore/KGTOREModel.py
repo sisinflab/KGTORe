@@ -98,6 +98,7 @@ class KGTOREModel(torch.nn.Module, ABC):
 
         self.ind_edges = ind_edges
         self.n_selected_edges = int(self.num_interactions * self.ind_edges)
+        self.gamma = self.gamma / self.ind_edges
 
         self.edge_path = dict()
         self.edge_len = dict()

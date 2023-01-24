@@ -28,14 +28,14 @@ experiment:
       lr: 0.001
       elr: 0.005
       l_w: 0.05
-      alpha: 0.8
-      beta: 0.2
+      alpha: 0.7
+      beta: 0.7
       epochs: 200
       factors: 64
-      gamma: 64
+      gamma: 0.64
+      ind_edges: 0.01
       n_layers: 3
       npr: 40
-      ind_edges: 0.01
       criterion: entropy
       loader: KGTORETSVLoader
       seed: 123
