@@ -9,7 +9,8 @@ METRICS_TEMPLATE = """experiment:
   top_k: 10
   evaluation:
     cutoffs: [10]
-    simple_metrics: [nDCGRendle2020]
+    simple_metrics: [nDCGRendle2020, nDCG, HR, Precision, Recall, MAP, MRR, ItemCoverage, UserCoverage, NumRetrieved,
+                     UserCoverage, Gini, SEntropy, EFD, EPC, PopREO, PopRSP, ACLT, APLT, ARP]
   gpu: 0
   models:
     RecommendationFolder:  

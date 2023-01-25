@@ -25,7 +25,7 @@ KGTORE_CONFIG = """experiment:
         validation_rate: 1
         validation_metric: nDCGRendle2020@10
       batch_size: {batch}
-      lr: [ loguniform, -9.210340372, -5.298317367]
+      lr: [ loguniform, -9.210340372, -5.298317367 ]
       elr: [ loguniform, -9.210340372, -5.298317367 ]
       alpha: {alpha}
       beta: {beta}
