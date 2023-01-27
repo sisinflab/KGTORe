@@ -2,6 +2,28 @@ from data_preprocessing.filters.knowledge import *
 from data_preprocessing.filters.dataset import UserItemIterativeKCore
 
 
+class KGToreFilterNew(FilterPipeline):
+
+    def __init__(self, dataset, kg: pd.DataFrame, linking: pd.DataFrame, core, **kwargs):
+        print('\n-- KGTORE --')
+        filters = [RemoveNoisyTriples, FilterKG, KGDatasetAlignment, DatasetKGAlignment, UserItemIterativeKCore, MapKG]
+        super(KGToreFilterNew, self).__init__(filters,
+                                           dataset=dataset,
+                                           kg=kg,
+                                           linking=linking,
+                                           core=core)
+
+    @property
+    def kg(self):
+        return self._kwargs['kg']
+
+    def filter_engine(self):
+        n_ratings = len(self._kwargs['dataset'])
+        super(KGToreFilterNew, self).filter_engine()
+        new_n_ratings = len(self._kwargs['dataset'])
+        self._flag = (n_ratings - new_n_ratings) == 0
+
+
 class KGToreFilter(FilterPipeline):
 
     def __init__(self, dataset, kg: pd.DataFrame, linking: pd.DataFrame, core, **kwargs):

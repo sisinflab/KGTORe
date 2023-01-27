@@ -1,6 +1,6 @@
 import os.path
 
-from data_preprocessing.filters.models import KGToreFilter, KaHFMFilter, KGINFilter, KGATFilter, KGFlexFilter
+from data_preprocessing.filters.models import KGToreFilter, KaHFMFilter, KGINFilter, KGATFilter, KGFlexFilter, KGToreFilterNew
 from data_preprocessing.filters.dataset import Binarize, Splitter
 from data_preprocessing.filters import load_kg, load_movielens, load_linking, store_dataset, store_mapped_kg
 from data_preprocessing.filters.knowledge import LinkingCleaning, KGTrainAlignment
@@ -44,7 +44,7 @@ def run(data_folder):
 
         flags = []
 
-        kgtore = KGToreFilter(**kwargs)
+        kgtore = KGToreFilterNew(**kwargs)
         kwargs['dataset'] = kgtore.filter()['dataset']
         flags.append(kgtore.flag)
         paths['kgtore'] = store_mapped_kg(**kgtore._kwargs,

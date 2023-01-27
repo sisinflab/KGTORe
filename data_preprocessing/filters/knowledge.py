@@ -4,6 +4,7 @@ from collections import Counter
 import pandas as pd
 import numpy as np
 
+
 class FilterKG(Filter):
     def __init__(self, kg: pd.DataFrame, rare_obj_threshold=3, min_obj_threshold=10, **kwargs):
         super(FilterKG, self).__init__()
@@ -58,7 +59,7 @@ class MapKG(Filter):
         self._map = linking.copy()
 
     def filter_engine(self):
-        #entities = set.union(set(self._kg.s), set(self._kg.o))
+        # entities = set.union(set(self._kg.s), set(self._kg.o))
         entities = np.unique(np.concatenate([self._kg.s, self._kg.o]))
 
         predicates = self._kg.p.unique()
@@ -230,3 +231,32 @@ class KGTrainAlignment(Filter):
     def filter_output(self):
         return {'data': self._dataset,
                 'kg': self._kg}
+
+
+class RemoveNoisyTriples(Filter):
+
+    def __init__(self, kg: pd.DataFrame, **kwargs):
+        super().__init__(**kwargs)
+        self._kg = kg.copy()
+        self.noisy_preds = [
+            'http://dbpedia.org/ontology/wikiPageWikiLink',
+            'http://www.w3.org/2002/07/owl#sameAs',
+            'http://schema.org/sameAs',
+            'http://purl.org/linguistics/gold/hypernym',
+            'http://www.w3.org/2000/01/rdf-schema#seeAlso',
+            'http://dbpedia.org/property/wordnet_type',
+            'http://dbpedia.org/ontology/wikiPageExternalLink',
+            'http://dbpedia.org/ontology/thumbnail',
+            'http://www.w3.org/ns/prov#wasDerivedFrom',
+            'http://dbpedia.org/property/wikiPageUsesTemplate',
+            'http://www.w3.org/2002/07/owl#differentFrom',
+            'http://www.w3.org/1999/02/22-rdf-syntax-ns#type']
+
+    def filter_engine(self):
+        noisy_triples = self._kg.p.isin(self.noisy_preds)
+        print(f'{self.__class__.__name__}: {sum(noisy_triples)} noisy triples found')
+        self._kg = self._kg[~noisy_triples]
+        self._flag = True
+
+    def filter_output(self):
+        return {'kg': self._kg}

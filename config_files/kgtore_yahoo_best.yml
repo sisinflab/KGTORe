@@ -18,29 +18,22 @@ experiment:
   models:
     external.KGTORE:
       meta:
-        hyper_max_evals: 20
-        hyper_opt_alg: tpe
         verbose: True
-        save_recs: False
-        validation_rate: 1
+        save_recs: True
+        validation_rate: 57
         validation_metric: nDCGRendle2020@10
       batch_size: 64
-      lr: 0.00050519696043968285
+      lr: 0.00020519696043968285
       elr: 0.0014346784702323088
       l_w: 0.060707796238838284
       alpha: 0.6
       beta: 0.6
-      epochs: 200
+      epochs: 57
       factors: 64
-      gamma: 0.9
+      gamma: 0.9343878992507734
       ind_edges: 0.001
       n_layers: 3
       npr: 30
       criterion: entropy
       loader: KGTORETSVLoader
       seed: 123
-      early_stopping:
-        patience: 5
-        mode: auto
-        monitor: nDCGRendle2020@10
-        verbose: True
