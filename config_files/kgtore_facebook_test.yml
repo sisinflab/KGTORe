@@ -32,8 +32,8 @@ experiment:
       beta: 0.6
       epochs: 200
       factors: 64
-      gamma: 0.9
-      ind_edges: 0.001
+      gamma: 1
+      ind_edges: 0.0001
       n_layers: 3
       npr: 30
       criterion: entropy
