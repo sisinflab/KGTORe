@@ -8,7 +8,7 @@ experiment:
     side_information:
       - dataloader: KGTORETSVLoader
         kg: ../data/{0}/kgtore/kg.tsv
-  dataset: facebook_book
+  dataset: yahoo_movies
   top_k: 10
   evaluation:
     cutoffs: [10]
