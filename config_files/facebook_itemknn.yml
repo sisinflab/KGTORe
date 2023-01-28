@@ -1,0 +1,25 @@
+experiment:
+  backend: pytorch
+  data_config:
+    strategy: fixed
+    train_path: ../data/{0}/train.tsv
+    validation_path: ../data/{0}/val.tsv
+    test_path: ../data/{0}/test.tsv
+  dataset: facebook_book
+  top_k: 10
+  evaluation:
+    cutoffs: [10]
+    simple_metrics: [nDCGRendle2020]
+  gpu: 0
+  external_models_path: ../external/models/__init__.py
+  models:
+    ItemKNN:
+      meta:
+        validation_rate: 1
+        save_recs: True
+        verbose: True
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
+      neighbors: [ uniform, 5, 700 ]
+      similarity: cosine
+      implementation: standard
