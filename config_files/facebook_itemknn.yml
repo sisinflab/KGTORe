@@ -15,11 +15,11 @@ experiment:
   models:
     ItemKNN:
       meta:
-        validation_rate: 1
-        save_recs: True
+        hyper_opt_alg: grid
         verbose: True
-        hyper_max_evals: 20
-        hyper_opt_alg: tpe
-      neighbors: [ uniform, 5, 700 ]
-      similarity: cosine
-      implementation: standard
+        save_weights: False
+        validation_metric: Recall@20
+        restore: False
+      neighbors: [50, 100, 200, 300, 400]
+      similarity: [cosine, jaccard, dice, dot]
+      seed: 123
