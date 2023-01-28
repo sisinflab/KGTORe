@@ -7,7 +7,8 @@ best_models = [
     'cf_facebook_best',
     'kahfm_facebook_results',
     'kgflex_facebook_results',
-    'kgin_facebook_results'
+    'kgin_facebook_results',
+    ''
     ]
 
 for b in best_models:
