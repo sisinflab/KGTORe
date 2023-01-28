@@ -33,7 +33,7 @@ experiment:
       gamma: 0.054524737
       ind_edges: 0.0001
       n_layers: 3
-      npr: 20
+      npr: 10
       criterion: entropy
       loader: KGTORETSVLoader
       seed: 123
