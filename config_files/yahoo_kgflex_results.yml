@@ -1,0 +1,29 @@
+experiment:
+  backend: tensorflow
+  data_config:
+    strategy: fixed
+    train_path: ../data/{0}/train.tsv
+    validation_path: ../data/{0}/val.tsv
+    test_path: ../data/{0}/test.tsv
+    side_information:
+      - dataloader: KGFlexLoader
+        item_features: ../data/{0}/kgflex/item_features.tsv
+  dataset: yahoo_movies
+  top_k: 50
+  evaluation:
+    cutoffs: [50]
+    simple_metrics: [nDCGRendle2020]
+  gpu: 0
+  external_models_path: ../external/models/__init__.py
+  models:
+    external.KGFlex:
+      loader: KGFlexLoader
+      meta:
+        verbose: True
+        save_recs: True
+        validation_rate: 23
+      lr: 0.02195434973950707
+      embedding: 5
+      epochs: 23
+      max_features_per_user: 1000
+      batch_size: 256
