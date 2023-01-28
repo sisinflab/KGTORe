@@ -15,12 +15,10 @@ experiment:
   models:
     ItemKNN:
       meta:
-        hyper_opt_alg: grid
         verbose: True
         save_weights: False
         validation_metric: nDCGRendle2020@10
-        restore: False
-        save_recs: False
-      neighbors: [50, 100, 200, 300, 400]
-      similarity: [cosine, jaccard, dice, dot]
+        save_recs: True
+      neighbors: 400
+      similarity: dot
       seed: 123

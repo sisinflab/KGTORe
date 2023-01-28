@@ -18,17 +18,14 @@ experiment:
   models:
     KGIN:
       meta:
-        hyper_max_evals: 20
-        hyper_opt_alg: tpe
         verbose: True
         save_recs: True
-        validation_rate: 1
-        validation_metric: nDCGRendle2020@10
-      lr: [ loguniform, -9.210340372, -5.298317367 ]
+        validation_rate: 22
+      lr: 0.0004974556005249158
       batch_size: 64
-      epochs: 200
-      l2: [ loguniform, -11.512925465, -2.30258509299 ]
-      lfr: [ loguniform, -11.512925465, -2.30258509299 ]
+      epochs: 22
+      l2: 0.053885509726367936
+      lfr: 0.008145222883360741
       emb: 64
       hops: 3
       n_fac: 4
@@ -39,8 +36,3 @@ experiment:
       ind: distance
       seed: 123
       loader: KGINTSVLoader
-      early_stopping:
-        patience: 5
-        mode: auto
-        monitor: nDCGRendle2020@10
-        verbose: True
