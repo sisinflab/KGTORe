@@ -37,3 +37,8 @@ experiment:
       criterion: entropy
       loader: KGTORETSVLoader
       seed: 123
+      early_stopping:
+        patience: 5
+        mode: auto
+        monitor: nDCGRendle2020@10
+        verbose: True
