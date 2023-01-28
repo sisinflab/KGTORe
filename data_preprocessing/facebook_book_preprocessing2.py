@@ -43,7 +43,7 @@ def run(data_folder):
 
         flags = []
 
-        kgtore = KGToreFilter(**kwargs)
+        kgtore = KGToreFilterNew(**kwargs)
         kwargs['dataset'] = kgtore.filter()['dataset']
         flags.append(kgtore.flag)
         paths['kgtore'] = store_mapped_kg(**kgtore._kwargs,
