@@ -24,7 +24,8 @@ movielens_best_models = ['movielens_noknowledge_best',
 best_models = movielens_best_models
 
 for b in best_models:
-    assert os.path.exists(os.path.join(CONFIG_DIR, b + '.yml'))
+    path = os.path.join(CONFIG_DIR, b + '.yml')
+    assert os.path.exists(path), f'{path} not found'
 
 for b in best_models:
     run_experiment(os.path.join(CONFIG_DIR, b + '.yml'))
