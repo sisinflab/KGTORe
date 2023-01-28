@@ -5,20 +5,26 @@ experiment:
     train_path: ../data/{0}/train.tsv
     validation_path: ../data/{0}/val.tsv
     test_path: ../data/{0}/test.tsv
-  dataset: yahoo_movies
-  top_k: 10
+    side_information:
+      - dataloader: KAHFMLoader
+        kg_train: ../data/{0}/kahfm/kg.tsv
+  dataset: movielens
+  top_k: 50
   evaluation:
-    cutoffs: [10]
+    cutoffs: [50]
     simple_metrics: [nDCGRendle2020]
   gpu: 0
   external_models_path: ../external/models/__init__.py
   models:
-    ItemKNN:
+    KaHFMEmbeddings:
       meta:
         verbose: True
-        save_weights: False
-        validation_metric: nDCGRendle2020@10
         save_recs: True
-      neighbors: 50
-      similarity: cosine
+        validation_rate: 36
+      epochs: 36
+      batch_size: 2048
+      lr: 0.0007862193934678993
+      l_w: 1.1290993113924475e-05
+      l_b: 0
+      loader: KAHFMLoader
       seed: 123

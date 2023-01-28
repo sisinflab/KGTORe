@@ -16,6 +16,11 @@ yahoo_best_models = ['yahoo_best_models',
                      #'facebook_kgtore_best'
                      ]
 
+movielens_best_models = ['movielens_best_models',
+                         'movielens_kahfm_best',
+                         'movielens_kgflex_best',
+                         'movielens_kgin_best']
+
 best_models = yahoo_best_models
 
 for b in best_models:
