@@ -20,7 +20,7 @@ experiment:
       meta:
         verbose: True
         save_recs: True
-        validation_rate: 57
+        validation_rate: 22
         validation_metric: nDCGRendle2020@10
       batch_size: 64
       lr: 0.00041155060113429626
