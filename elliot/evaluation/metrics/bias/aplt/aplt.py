@@ -66,8 +66,10 @@ class APLT(BaseMetric):
         :param user_relevant_items: list of user relevant items in the form [item1,...]
         :return: the value of the Average Recommendation Popularity metric for the specific user
         """
-        return len(set([i for i,v in user_recommendations[:cutoff]]) & set(long_tail)) / len(user_recommendations[:cutoff])
-
+        try:
+            return len(set([i for i, v in user_recommendations[:cutoff]]) & set(long_tail)) / len(user_recommendations[:cutoff])
+        except:
+            print()
     # def eval(self):
     #     """
     #     Evaluation function
