@@ -21,7 +21,7 @@ movielens_best_models = ['movielens_best_models',
                          'movielens_kgflex_best',
                          'movielens_kgin_best']
 
-best_models = yahoo_best_models
+best_models = movielens_best_models
 
 for b in best_models:
     assert os.path.exists(os.path.join(CONFIG_DIR, b + '.yml'))
