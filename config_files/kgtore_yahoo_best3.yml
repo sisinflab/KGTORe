@@ -30,7 +30,7 @@ experiment:
       beta: 0.8
       epochs: 100
       factors: 64
-      gamma: 0.054524737
+      gamma: 0
       ind_edges: 0.0001
       n_layers: 3
       npr: 30
