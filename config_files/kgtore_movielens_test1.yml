@@ -31,7 +31,7 @@ experiment:
       epochs: 100
       factors: 64
       gamma: 0.9343878992507734
-      ind_edges: 0.00001
+      ind_edges: 0.000001
       n_layers: 3
       npr: 20
       criterion: entropy
