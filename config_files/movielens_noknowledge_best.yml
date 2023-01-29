@@ -69,7 +69,6 @@ experiment:
       meta:
         verbose: True
         save_weights: False
-        validation_metric: nDCGRendle2020@10
         save_recs: True
       neighbors: 200
       similarity: cosine
