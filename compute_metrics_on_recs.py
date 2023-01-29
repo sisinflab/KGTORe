@@ -10,7 +10,7 @@ assert os.path.exists(RECS_FOLDER)
 assert os.path.exists(CONFIG_DIR)
 
 parser = argparse.ArgumentParser(description="Run sample main.")
-parser.add_argument('--dataset', type=str, nargs='+', default=['yahoo_movies'])
+parser.add_argument('--dataset', type=str, nargs='+', default=['movielens'])
 args = parser.parse_args()
 
 datasets = args.dataset
