@@ -17,9 +17,10 @@ yahoo_best_models = ['yahoo_noknowledge_best',
                      ]
 
 movielens_best_models = ['movielens_noknowledge_best',
-                         'movielens_kahfm_best',
-                         'movielens_kgflex_best',
-                         'movielens_kgin_best']
+                         #'movielens_kahfm_best',
+                         #'movielens_kgflex_best',
+                         #'movielens_kgin_best'
+                         ]
 
 best_models = movielens_best_models
 
