@@ -33,7 +33,7 @@ KGTORE_CONFIG = """experiment:
       epochs: 200
       factors: 64
       n_layers: 3
-      npr: 20
+      npr: {npr}
       criterion: entropy
       loader: KGTORETSVLoader
       seed: 123
