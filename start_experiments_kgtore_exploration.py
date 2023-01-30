@@ -51,7 +51,7 @@ for d in dataset:
                     'movielens': 0.060707796238838284}
             gammas = {'facebook_book': 0.00041155060113429626,
                       'yahoo_movies': 0.054524737,
-                      'movielens': 0.9343878992507734}
+                      'movielens': 0.0043878992507734}
 
             batch_sizes = {'facebook_book': 64,
                            'yahoo_movies': 256,
