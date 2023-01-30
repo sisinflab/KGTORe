@@ -9,8 +9,9 @@ METRICS_TEMPLATE = """experiment:
   top_k: {k}
   evaluation:
     cutoffs: [{k}]
-    simple_metrics: [nDCGRendle2020, nDCG, HR, Precision, Recall, MAP, MRR, ItemCoverage, UserCoverage, NumRetrieved,
-                     UserCoverage, Gini, SEntropy, EFD, EPC, PopREO, PopRSP, ACLT, APLT, ARP]
+    paired_ttest: True
+    wilcoxon_test: True
+    simple_metrics: [nDCGRendle2020, HR, Precision, Recall]
   gpu: 0
   models:
     RecommendationFolder:  

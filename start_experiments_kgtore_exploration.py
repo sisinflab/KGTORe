@@ -9,6 +9,7 @@ parser.add_argument('--npr', type=str, nargs='+', default=[40])
 parser.add_argument('--layer', type=str, nargs='+', default=[3])
 parser.add_argument('--alpha', type=str, nargs='+', default=[0.2, 0.4, 0.6, 0.8])
 parser.add_argument('--beta', type=str, nargs='+', default=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9])
+parser.add_argument('--gamma', type=float, default=0.5)
 parser.add_argument('--criterion', type=str, nargs='+', default=['entropy'])
 parser.add_argument('--gpu', type=int, default=0)
 args = parser.parse_args()
@@ -20,6 +21,7 @@ dataset = args.dataset
 alphas = args.alpha
 betas = args.beta
 gpu = args.gpu
+gamma = args.gamma
 
 print('Exploration of parameters:\n'
       f'npr: {nprs}\n'
@@ -28,6 +30,7 @@ print('Exploration of parameters:\n'
       f'dataset: {dataset}\n'
       f'alpha : {alphas}\n'
       f'beta: {betas}\n'
+      f'gamma: {gamma}\n'
       )
 
 for d in dataset:
@@ -60,7 +63,7 @@ for d in dataset:
             lr = float(lrs[d])
             elr = float(elrs[d])
             l_w = float(l_ws[d])
-            gamma = float(gammas[d])
+            gamma = float(gamma)
             batch = int(batch_sizes[d])
 
             print(f'Starting training with '
