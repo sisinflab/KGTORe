@@ -10,7 +10,7 @@ assert os.path.exists(RECS_FOLDER)
 assert os.path.exists(CONFIG_DIR)
 
 parser = argparse.ArgumentParser(description="Run sample main.")
-parser.add_argument('--dataset', type=str, nargs='+', default=['yahoo_movies'])
+parser.add_argument('--dataset', type=str, nargs='+', default=['movielens'])
 args = parser.parse_args()
 
 datasets = args.dataset
@@ -20,7 +20,7 @@ for dataset in datasets:
     recs_folder = os.path.join(RECS_FOLDER, dataset)
     assert os.path.exists(recs_folder)
 
-    config = METRICS_TEMPLATE.format(dataset=dataset, recs=recs_folder, k=20)
+    config = METRICS_TEMPLATE.format(dataset=dataset, recs=recs_folder, k=10)
     config_path = os.path.join(CONFIG_DIR, 'runtime_metrics_conf.yml')
     with open(config_path, 'w') as file:
         file.write(config)
