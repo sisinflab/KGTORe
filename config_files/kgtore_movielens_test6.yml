@@ -23,14 +23,14 @@ experiment:
         validation_rate: 1
         validation_metric: nDCGRendle2020@10
       batch_size: 2048
-      lr: 0,00014662865651040037
-      elr: 0,000982557720672871
-      l_w: 0,008638070598763056
+      lr: 0.00014662865651040037
+      elr: 0.000982557720672871
+      l_w: 0.008638070598763056
       alpha: 0.6
       beta: 0.6
       epochs: 100
       factors: 64
-      gamma: 0,7132484082391235
+      gamma: 0.7132484082391235
       ind_edges: 0.00001
       n_layers: 3
       npr: 20
