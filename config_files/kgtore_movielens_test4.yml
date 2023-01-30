@@ -8,7 +8,7 @@ experiment:
     side_information:
       - dataloader: KGTORETSVLoader
         kg: ../data/{0}/kgtore/kg.tsv
-  dataset: yahoo_movies
+  dataset: movielens
   top_k: 10
   evaluation:
     cutoffs: [10]
@@ -20,20 +20,20 @@ experiment:
       meta:
         verbose: True
         save_recs: True
-        validation_rate: 18
+        validation_rate: 1
         validation_metric: nDCGRendle2020@10
-      batch_size: 256
-      lr: 0.000664750387531533
-      elr: 0.00305727041704464
-      l_w: 0.00312734853526998
+      batch_size: 2048
+      lr: 0.00020519696043968285
+      elr: 0.0014346784702323088
+      l_w: 0.060707796238838284
       alpha: 0.6
       beta: 0.6
-      epochs: 18
+      epochs: 100
       factors: 64
-      gamma: 0.054524737
-      ind_edges: 0.01
+      gamma: 0.9343878992507734
+      ind_edges: 0.00001
       n_layers: 3
-      npr: 20
+      npr: 2
       criterion: entropy
       loader: KGTORETSVLoader
       seed: 123
