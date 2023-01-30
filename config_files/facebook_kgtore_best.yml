@@ -26,11 +26,11 @@ experiment:
       lr: 0.00041155060113429626
       elr: 0.0027244852932723014
       l_w: 0.060707796238838284
+      gamma: 0.9054246604017769
       alpha: 0.6
       beta: 0.6
       epochs: 22
       factors: 64
-      gamma: 0.9054246604017769
       ind_edges: 0.01
       n_layers: 3
       npr: 10
