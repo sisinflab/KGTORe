@@ -26,8 +26,8 @@ KGTORE_CONFIG = """experiment:
       lr: 0.000664750387531533
       elr: 0.00305727041704464
       l_w: 0.00312734853526998
-      alpha: 0.6
-      beta: 0.6
+      alpha: {alpha}
+      beta: {beta}
       ind_edges: {ind_edges}
       epochs: 200
       factors: 64
