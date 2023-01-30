@@ -33,12 +33,6 @@ print('Exploration of parameters:\n'
 for d in dataset:
     for alpha in alphas:
         for beta in betas:
-            print(f'Starting training with '
-                  f'dataset: {d}\n'
-                  f'alpha: {alpha}\n'
-                  f'beta: {beta}'
-                  f'gamma: {gammas}\n'
-                  )
 
             assert d in ['facebook_book', 'movielens', 'yahoo_movies']
 
@@ -63,6 +57,16 @@ for d in dataset:
             elr = elrs[d]
             l_w = l_ws[d]
             gamma = gammas[d]
+
+            print(f'Starting training with '
+                  f'dataset: {d}\n'
+                  f'alpha: {alpha}\n'
+                  f'beta: {beta}'
+                  f'lr: {lr}'
+                  f'elr: {elr}'
+                  f'l_w: {l_w}'
+                  f'gamma: {gamma}\n'
+                  )
 
             if int(beta) == 1:
                 gamma = 0
