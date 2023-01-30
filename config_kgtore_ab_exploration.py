@@ -19,7 +19,7 @@ KGTORE_CONFIG = """experiment:
     external.KGTORE:
       meta:
         verbose: True
-        save_recs: False
+        save_recs: True
         validation_rate: 1
         validation_metric: nDCGRendle2020@10
       batch_size: {batch}
