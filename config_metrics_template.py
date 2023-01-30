@@ -6,9 +6,9 @@ METRICS_TEMPLATE = """experiment:
     validation_path: ../data/{dataset}/val.tsv
     test_path: ../data/{dataset}/test.tsv
   dataset: {dataset}
-  top_k: 10
+  top_k: {k}
   evaluation:
-    cutoffs: [10]
+    cutoffs: [{k}]
     simple_metrics: [nDCGRendle2020, nDCG, HR, Precision, Recall, MAP, MRR, ItemCoverage, UserCoverage, NumRetrieved,
                      UserCoverage, Gini, SEntropy, EFD, EPC, PopREO, PopRSP, ACLT, APLT, ARP]
   gpu: 0
