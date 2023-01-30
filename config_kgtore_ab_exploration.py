@@ -22,13 +22,13 @@ KGTORE_CONFIG = """experiment:
         save_recs: True
         validation_rate: 1
         validation_metric: nDCGRendle2020@10
-      batch_size: 256
+      batch_size: {batch}
       lr: 0.000664750387531533
       elr: 0.00305727041704464
       l_w: 0.00312734853526998
       alpha: {alpha}
       beta: {beta}
-      gamma: 0.054524737
+      gamma: {gamma}
       ind_edges: {ind_edges}
       epochs: 200
       factors: 64
