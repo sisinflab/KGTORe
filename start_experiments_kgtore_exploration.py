@@ -53,10 +53,10 @@ for d in dataset:
                       'yahoo_movies': 0.054524737,
                       'movielens': 0.9343878992507734}
 
-            lr = lrs[d]
-            elr = elrs[d]
-            l_w = l_ws[d]
-            gamma = gammas[d]
+            lr = float(lrs[d])
+            elr = float(elrs[d])
+            l_w = float(l_ws[d])
+            gamma = float(gammas[d])
 
             print(f'Starting training with '
                   f'dataset: {d}\n'
@@ -68,7 +68,7 @@ for d in dataset:
                   f'gamma: {gamma}\n'
                   )
 
-            if int(beta) == 1:
+            if int(float(beta)) == 1:
                 gamma = 0
 
             config = KGTORE_CONFIG.format(dataset=d,
