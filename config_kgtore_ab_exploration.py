@@ -22,7 +22,7 @@ KGTORE_CONFIG = """experiment:
         save_recs: False
         validation_rate: 1
         validation_metric: nDCGRendle2020@10
-      batch_size: 256
+      batch_size: {batch}
       lr: 0.000664750387531533
       elr: 0.00305727041704464
       l_w: 0.00312734853526998

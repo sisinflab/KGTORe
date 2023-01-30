@@ -53,19 +53,25 @@ for d in dataset:
                       'yahoo_movies': 0.054524737,
                       'movielens': 0.9343878992507734}
 
+            batch_sizes = {'facebook_book': 64,
+                           'yahoo_movies': 256,
+                           'movielens': 2048}
+
             lr = float(lrs[d])
             elr = float(elrs[d])
             l_w = float(l_ws[d])
             gamma = float(gammas[d])
+            batch = int(batch_sizes[d])
 
             print(f'Starting training with '
                   f'dataset: {d}\n'
                   f'alpha: {alpha}\n'
-                  f'beta: {beta}'
-                  f'lr: {lr}'
-                  f'elr: {elr}'
-                  f'l_w: {l_w}'
+                  f'beta: {beta}\n'
+                  f'lr: {lr}\n'
+                  f'elr: {elr}\n'
+                  f'l_w: {l_w}\n'
                   f'gamma: {gamma}\n'
+                  f'batch: {batch}\n'
                   )
 
             if int(float(beta)) == 1:
@@ -79,7 +85,8 @@ for d in dataset:
                                           l_w=l_w,
                                           gamma=gamma,
                                           gpu=int(gpu),
-                                          ind_edges=float(ind_edges[d]))
+                                          ind_edges=float(ind_edges[d]),
+                                          batch=batch)
 
             config_dir = './config_files'
             config_path = os.path.join(config_dir, 'runtime_conf.yml')
