@@ -22,7 +22,7 @@ import torch
 import numpy as np
 from torch_sparse import SparseTensor
 import multiprocessing as mp
-# mp.set_start_method('fork')
+mp.set_start_method('fork')
 from collections import Counter
 
 seed = 0
