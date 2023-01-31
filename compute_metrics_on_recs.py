@@ -3,7 +3,7 @@ from config_metrics_template import METRICS_TEMPLATE
 import argparse
 import os
 
-RECS_FOLDER = os.path.abspath('./results/recs')
+RECS_FOLDER = os.path.abspath('./results/noisy_trees')
 CONFIG_DIR = './config_files'
 
 assert os.path.exists(RECS_FOLDER)
