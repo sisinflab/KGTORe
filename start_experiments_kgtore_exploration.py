@@ -64,7 +64,7 @@ for d in dataset:
                 lr = float(lrs[d])
                 elr = float(elrs[d])
                 l_w = float(l_ws[d])
-                gamma = float(gammas[d])
+                gamma = float(gammas)
                 batch = int(batch_sizes[d])
 
                 print(f'Starting training with '
