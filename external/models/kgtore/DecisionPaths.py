@@ -43,9 +43,17 @@ class DecisionPaths:
         self._feature_to_private = None
         self.i_f = None
         self.train_dict = None
+        self.private_to_feature = None
+        self._store_features_flag = True
         self.edge_features = list()
         self.build_if(kg)
         self.build_decision_paths()  # for feature dev.
+
+    def save_mapped_features(self, features_map):
+        name = 'mapped_features' + str(self.npr) + "_" + str(self.criterion) + ".tsv"
+        dataset_path = os.path.abspath(os.path.join('./data', self.dataset_name, 'kgtore', name))
+        features_map.to_csv(dataset_path, sep='\t', header=False, index=False)
+        print(f'Mapped features stored at {dataset_path}')
 
     def save_edge_features_df(self, edge_feature_df):
         name = 'decision_path' + str(self.npr) + "_" + str(self.criterion) + ".tsv"
@@ -68,12 +76,21 @@ class DecisionPaths:
         self._feature_to_private = {f: i for i, f in enumerate(i_f['feature'].unique(), 1)}
         i_f['feature'] = i_f['feature'].map(self._feature_to_private)  # da df a mapping interno
         self.i_f = i_f.groupby('subject')['feature'].apply(set).to_dict()
+        self.private_to_feature = {priv: pub for pub, priv in self._feature_to_private.items()}
         # self._data.i_train_dict = {u1: {i1: rating, i2:rating, ..}, u2: {ix:rating, ..}}
 
     def create_edge_features_matrix(self):
         edge_features = pd.DataFrame(self.edge_features)
         edge_features.columns = ['user', 'item', 'feature']
         edge_features['val'] = np.sign(edge_features['feature'])
+        features_to_store = edge_features.copy()
+        if self._store_features_flag:
+            features_to_store['feature'] = np.abs(features_to_store['feature'])
+            private_items = {i: k for k, i in self.public_items.items()}
+            features_to_store['feature'] = features_to_store['feature'].map(self.private_to_feature)
+            features_to_store['public_item'] = features_to_store['item'].map(private_items)
+            self.save_mapped_features(features_to_store)
+
         edge_features['feature'] = np.abs(edge_features['feature'])
         new_mapping = {p: pnew for pnew, p in enumerate(edge_features['feature'].unique())}
         edge_features['feature'] = edge_features['feature'].map(new_mapping)
