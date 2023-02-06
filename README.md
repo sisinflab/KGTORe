@@ -76,7 +76,7 @@ the datasets, the knowledge graphs and the related item-entity linking.
 
 The datasets could be found within the directory `./data/[DATASET]/data`. 
 Only for Movielens 1M, within the [directory](data/movielens/grouplens) `./data/movielens/grouplens`
-While, the knowledge graphs and links at  `./data/[DATASET]/dbpedia`.
+For the knowledge graphs and links please look at  `./data/[DATASET]/dbpedia`.
 
 ## Elliot Configuration Files
 
