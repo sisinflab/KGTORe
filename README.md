@@ -74,7 +74,8 @@ After the setup of your Docker containers, you may follow the exact same guideli
 At `./data/` you may find all the [files](data) related to 
 the datasets, the knowledge graphs and the related item-entity linking.
 
-The datasets could be found within the directory `./data/[DATASET]/data`.
+The datasets could be found within the directory `./data/[DATASET]/data`. 
+Only for Movielens 1M, within the [directory](data/movielens/grouplens) `./data/movielens/grouplens`
 While, the knowledge graphs and links at  `./data/[DATASET]/dbpedia`.
 
 ## Elliot Configuration Files
