@@ -124,6 +124,13 @@ python run.py
 It runs the pre-processing procedure and then trains our KGTORe model and all the baselines on three different datasets.
 The results will be stored in the folder ```results/DATASET/```.
 
+### Preprocessing
+
+If you are interested in running just the data preprocessing step, please run:
+
+```
+python preprocessing.py
+```
 
 ### Evaluate Recommendation Lists
 
