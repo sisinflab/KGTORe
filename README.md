@@ -37,8 +37,6 @@ all the experiments have been executed on the same docker container.
 If the reader would like to use it, 
 please look at the corresponding section in [requirements](#requirements).
 
-In the following you will find ...
-
 ## Requirements 
 
 This software has been executed on the operative system Ubuntu `18.04`.
@@ -108,7 +106,7 @@ The following are the parameters required by KGTORe:
 - ```npr```: negative-positive ratio when building the decision tree;
 - ```epochs```: training epochs
 
-bisogna cambiare alpha e beta, cambiare l_ind e togliere criterion
+bisogna cambiare alpha e beta, togliere criterion
 
 ## Usage
 
@@ -139,8 +137,13 @@ python compute_metrics_on_recs.py
 Within the [file](compute_metrics_on_recs.py) it is possible to specify the directory containing the recommendation lists.
 The [default](results/recs/) solution is ```results/recs/[DATASET]```.
 
+Along with the evaluation metrics also the student's paired t-test is computed.
+
 ### Statistical Significance
 
 The results statistical significance has been evaluated performing a Student's Paired t-Test. 
-The precomputed results could be found at 
+The precomputed results on the best models could be found at
+[results/student_paired_t_test](results/student_paired_t_test).
 
+The paired t-test is computed during recommendation metrics computation. 
+Please, see the [evaluation](#evaluate-recommendation-lists) section to compute them.

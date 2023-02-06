@@ -1,0 +1,38 @@
+experiment:
+  backend: pytorch
+  data_config:
+    strategy: fixed
+    train_path: ../data/{0}/train.tsv
+    validation_path: ../data/{0}/val.tsv
+    test_path: ../data/{0}/test.tsv
+    side_information:
+      - dataloader: KGTORETSVLoader
+        kg: ../data/{0}/kgtore/kg.tsv
+  dataset: movielens
+  top_k: 50
+  evaluation:
+    cutoffs: [50]
+    simple_metrics: [nDCGRendle2020]
+  gpu: 0
+  external_models_path: ../external/models/__init__.py
+  models:
+    external.KGTORE:
+      meta:
+        verbose: True
+        save_recs: False
+        validation_rate: 8
+      batch_size: 2048
+      lr: 0.000664750387531533
+      elr: 0.00305727041704464
+      l_w: 0.00312734853526998
+      alpha: 0.9
+      beta: 0.1
+      epochs: 8
+      factors: 64
+      l_ind: 0.0043878992507734
+      ind_edges: 0.00001
+      n_layers: 3
+      npr: 5
+      criterion: entropy
+      loader: KGTORETSVLoader
+      seed: 123

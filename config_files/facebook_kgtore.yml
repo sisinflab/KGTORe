@@ -26,13 +26,13 @@ experiment:
         validation_metric: nDCGRendle2020@10
       batch_size: 64
       lr: [ loguniform, -9.721165996, -5.11599581 ]
-      elr: [ loguniform, -8.111728083., -3.506557897 ]
-      l_w: [ loguniform, -8.111728083., -3.506557897 ]
-      alpha: 0.1
-      beta: 0.9
+      elr: [ loguniform, -8.111728083, -3.506557897 ]
+      l_w: [ loguniform, -8.111728083, -3.506557897 ]
+      alpha: 0.9
+      beta: 0.1
       epochs: 100
       factors: 64
-      gamma: [ loguniform, -9.210340372, -10.126631104 ]
+      l_ind: [ loguniform, -10.126631104, -9.210340372 ]
       ind_edges: 0.01
       n_layers: 3
       npr: 20

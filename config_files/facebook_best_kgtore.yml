@@ -21,14 +21,13 @@ experiment:
         verbose: True
         save_recs: True
         validation_rate: 2
-        validation_metric: nDCGRendle2020@10
       batch_size: 64
       lr: 0.000664750387531533
       elr: 0.00305727041704464
       l_w: 0.00312734853526998
-      gamma: 0.00041155060113429626
-      alpha: 0.1
-      beta: 0.9
+      l_ind: 0.00041155060113429626
+      alpha: 0.9
+      beta: 0.1
       epochs: 2
       factors: 64
       ind_edges: 0.01

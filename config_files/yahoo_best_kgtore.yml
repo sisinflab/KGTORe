@@ -9,9 +9,9 @@ experiment:
       - dataloader: KGTORETSVLoader
         kg: ../data/{0}/kgtore/kg.tsv
   dataset: yahoo_movies
-  top_k: 10
+  top_k: 50
   evaluation:
-    cutoffs: [10]
+    cutoffs: [50]
     simple_metrics: [nDCGRendle2020]
   gpu: 0
   external_models_path: ../external/models/__init__.py
@@ -20,25 +20,19 @@ experiment:
       meta:
         verbose: True
         save_recs: True
-        validation_rate: 1
-        validation_metric: nDCGRendle2020@10
+        validation_rate: 38
       batch_size: 256
       lr: 0.000664750387531533
       elr: 0.00305727041704464
       l_w: 0.00312734853526998
-      alpha: 0.1
-      beta: 0.9
-      epochs: 100
+      alpha: 0.9
+      beta: 0.1
+      epochs: 38
       factors: 64
-      gamma: 0.054524737
+      l_ind: 0.054524737
       ind_edges: 0.001
       n_layers: 3
       npr: 20
       criterion: entropy
       loader: KGTORETSVLoader
       seed: 123
-      early_stopping:
-        patience: 5
-        mode: auto
-        monitor: nDCGRendle2020@10
-        verbose: True

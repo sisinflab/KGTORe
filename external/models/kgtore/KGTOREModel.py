@@ -19,7 +19,7 @@ class KGTOREModel(torch.nn.Module, ABC):
                  l_w,
                  alpha,
                  beta,
-                 gamma,
+                 l_ind,
                  ind_edges,
                  n_layers,
                  edge_index,
@@ -48,7 +48,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.learning_rate = learning_rate
         self.edges_lr = edges_lr
         self.l_w = l_w
-        self.gamma = gamma
+        self.l_ind = l_ind
         self.n_layers = n_layers
         self.weight_size_list = [self.embedding_size] * (self.n_layers + 1)
         self.alpha = torch.tensor([1 / (k + 1) for k in range(len(self.weight_size_list))])
@@ -96,7 +96,7 @@ class KGTOREModel(torch.nn.Module, ABC):
 
         self.ind_edges = ind_edges
         self.n_selected_edges = int(self.num_interactions * self.ind_edges)
-        self.gamma = self.gamma / self.ind_edges
+        self.l_ind = self.l_ind / self.ind_edges
 
         self.edge_path = dict()
         self.edge_len = dict()
@@ -159,17 +159,17 @@ class KGTOREModel(torch.nn.Module, ABC):
         features_reg_loss = self.l_w * torch.norm(self.F, 2)
 
         # independence loss over the features within the same path
-        if self.gamma > 0:
+        if self.l_ind > 0:
             selected_edges = random.sample(list(range(self.num_interactions)), self.n_selected_edges)
             ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_path[e]])).sum() - self.edge_len[e] for e in selected_edges]
-            ind_loss = sum(ind_loss) / self.n_selected_edges * self.gamma
+            ind_loss = sum(ind_loss) / self.n_selected_edges * self.l_ind
 
         loss = bpr_loss + reg_loss
         self.optimizer.zero_grad()
         self.edges_optimizer.zero_grad()
 
         loss.backward(retain_graph=True)
-        if self.gamma > 0:
+        if self.l_ind > 0:
             ind_loss.backward(retain_graph=True)
         features_reg_loss.backward()
 

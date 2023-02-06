@@ -31,7 +31,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             ("_l_w", "l_w", "l_w", 0.01, float, None),
             ("_alpha", "alpha", "alpha", 0.5, float, None),
             ("_beta", "beta", "beta", 0.5, float, None),
-            ("_gamma", "gamma", "gamma", 0.5, float, None),
+            ("_l_ind", "l_ind", "l_ind", 0.5, float, None),
             ("_ind_edges", "ind_edges", "ind_edges", 0.01, float, None),
             ("_n_layers", "n_layers", "n_layers", 1, int, None),
             ("_npr", "npr", "npr", 10, int, None),
@@ -78,6 +78,9 @@ class KGTORE(RecMixin, BaseRecommenderModel):
 
         print(f'Number of KGTORE features: {self.edge_features.size(1)}')
 
+        self._alpha = 1 - self._alpha
+        self._beta = 1 - self._beta
+
         self._model = KGTOREModel(
             num_users=self._num_users,
             num_items=self._num_items,
@@ -88,7 +91,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             l_w=self._l_w,
             alpha=self._alpha,
             beta=self._beta,
-            gamma=self._gamma,
+            l_ind=self._l_ind,
             ind_edges=self._ind_edges,
             n_layers=self._n_layers,
             edge_index=self.edge_index,
