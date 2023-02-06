@@ -136,7 +136,7 @@ For computing the recommendation metrics on the recommendation lists run the fol
 python compute_metrics_on_recs.py
 ```
 
-Within the file it is possible to specify the directory containing the recommendation lists.
+Within the [file](compute_metrics_on_recs.py) it is possible to specify the directory containing the recommendation lists.
 The default solution is ```results/recs/[DATASET]```.
 
 ### Experiments configuration
