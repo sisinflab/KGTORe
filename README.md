@@ -7,14 +7,15 @@ This is the official implementation of the paper
 
 - [Description](#description)
 - [Requirements](#requirements)
-  - [Installation guidelines: scenario #1](#Installation-guidelines:-scenario-#1)
-  - [Installation guidelines: scenario #2](#Installation-guidelines:-scenario-#2)
+  - [Installation guidelines: scenario #1](#installation-guidelines-scenario-1)
+  - [Installation guidelines: scenario #2](#installation-guidelines-scenario-2)
 - [Datasets](#datasets)
 - [Elliot Configuration Files](#elliot-configuration-files)
 - [Recommendation Lists](#recommendation-lists)
 - [KGTORe Parameters](#kgtore-parameters)
 - [Usage](#usage)
   - [Reproduce Paper Results](#reproduce-paper-results)
+  - [Preprocessing](#preprocessing)
   - [Evaluate Recommendation Lists](#evaluate-recommendation-lists)
   - [Statistical Significance](#statistical-significance)
 
