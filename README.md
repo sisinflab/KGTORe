@@ -83,7 +83,7 @@ While the best models hyperparameters are reported in the files named `[DATASET]
 ## Recommendation Lists
 
 The best models recommendation lists could be found at `./results/recs`. 
-You may be use them for computing the recommendation metrics as described at [Evaluate Recommendation](#Evaluate-Recommendation)
+You may be use them for computing the recommendation metrics as described at [Evaluate Recommendation](#Evaluate-Recommendation-Lists)
 
 ### KGTORe Parameters
 
@@ -123,7 +123,14 @@ The results will be stored in the folder ```results/DATASET/```.
 
 ### Evaluate Recommendation Lists
 
+For computing the recommendation metrics on the recommendation lists run the following command:
 
+```
+python compute_metrics_on_recs.py
+```
+
+Within the file it is possible to specify the directory containing the recommendation lists.
+The default solution is ```results/recs/[DATASET]```.
 
 ### Experiments configuration
 
