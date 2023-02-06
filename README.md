@@ -16,7 +16,7 @@ This is the official implementation of the paper
 - [Usage](#usage)
   - [Reproduce Paper Results](#reproduce-paper-results)
   - [Evaluate Recommendation Lists](#evaluate-recommendation-lists)
-  - [Statistical Significance]()
+  - [Statistical Significance](#statistical-significance)
 
 
 
@@ -105,8 +105,6 @@ The following are the parameters required by KGTORe:
 - ```n_layers```: graph convolutional network layers;
 - ```npr```: negative-positive ratio when building the decision tree;
 - ```epochs```: training epochs
-
-bisogna cambiare alpha e beta, togliere criterion
 
 ## Usage
 

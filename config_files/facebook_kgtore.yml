@@ -36,7 +36,6 @@ experiment:
       ind_edges: 0.01
       n_layers: 3
       npr: 20
-      criterion: entropy
       loader: KGTORETSVLoader
       seed: 123
       early_stopping:
