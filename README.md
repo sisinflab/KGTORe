@@ -69,11 +69,11 @@ Make sure you have Docker and NVIDIA Container Toolkit installed on your machine
 
 Then, you may use the following Docker image to instantiate the container equipped with CUDA `10.2` and cuDNN `8.0` (the environment for `PyTorch`): [link](https://hub.docker.com/layers/nvidia/cuda/10.2-cudnn8-devel-ubuntu18.04/images/sha256-3d1aefa978b106e8cbe50743bba8c4ddadacf13fe3165dd67a35e4d904f3aabe?context=explore)
 
-After the setup of your Docker containers, you may follow the exact same guidelines as scenario #1.
+After the setup of your Docker containers, you may follow the exact same guidelines as [scenario #1](#installation-guidelines-scenario-1).
 
 ## Datasets
 
-At `./data/` you may find all the files related to 
+At `./data/` you may find all the [files](data) related to 
 the datasets, the knowledge graphs and the related item-entity linking.
 
 The datasets could be found within the directory `./data/[DATASET]/data`.
@@ -81,7 +81,7 @@ While, the knowledge graphs and links at  `./data/[DATASET]/dbpedia`.
 
 ## Elliot Configuration Files
 
-At `./config_files/` you may find the Elliot configuration files used for setting the experiments.
+At `./config_files/` you may find the Elliot [configuration files](config_files) used for setting the experiments.
 
 
 The configuration files for training the models are reported as `[DATASET]_[MODEL].yml`. 
@@ -139,9 +139,8 @@ python compute_metrics_on_recs.py
 Within the [file](compute_metrics_on_recs.py) it is possible to specify the directory containing the recommendation lists.
 The [default](results/recs/) solution is ```results/recs/[DATASET]```.
 
-### Experiments configuration
+### Statistical Significance
 
-Each model requires specific parameters: a brief overview of KGFlex parameters is provided [here](#kgflex-parameters).
-
-For further information about how to configure Elliot experiments, please refer to Elliot documentation.
+The results statistical significance has been evaluated performing a Student's Paired t-Test. 
+The precomputed results could be found at 
 
