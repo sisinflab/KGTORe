@@ -1,0 +1,71 @@
+experiment:
+  backend: pytorch
+  data_config:
+    strategy: fixed
+    train_path: ../data/{0}/train.tsv
+    validation_path: ../data/{0}/val.tsv
+    test_path: ../data/{0}/test.tsv
+  dataset: facebook_book
+  top_k: 50
+  evaluation:
+    cutoffs: [50]
+    simple_metrics: [nDCGRendle2020]
+  gpu: 0
+  external_models_path: ../external/models/__init__.py
+  models:
+    MostPop:
+      meta:
+        verbose: True
+        save_recs: True
+    Random:
+      meta:
+        verbose: True
+        save_recs: True
+    external.BPRMF:
+      meta:
+        verbose: True
+        save_recs: True
+        validation_rate: 29
+      lr: 0.0017664102849921446
+      batch_size: 64
+      epochs: 29
+      factors: 64
+      l_w: 0.05721092247228661
+      seed: 123
+    external.LightGCN:
+      meta:
+        verbose: True
+        save_recs: True
+        validation_rate: 2
+      lr: 0.0028462729478462134
+      epochs: 2
+      factors: 64
+      batch_size: 64
+      l_w: 0.06184015598288455
+      n_layers: 3
+      seed: 123
+    external.DGCF:
+      meta:
+        verbose: True
+        save_recs: True
+        validation_rate: 4
+      lr: 0.0007530315047454896
+      epochs: 4
+      factors: 64
+      batch_size: 64
+      l_w_bpr: 0.009012642853028007
+      l_w_ind: 0.0008369458994883327
+      ind_batch_size: 64
+      n_layers: 1
+      routing_iterations: 2
+      intents: 4
+      seed: 123
+    ItemKNN:
+      meta:
+        verbose: True
+        save_weights: False
+        validation_metric: nDCGRendle2020@10
+        save_recs: True
+      neighbors: 400
+      similarity: dot
+      seed: 123

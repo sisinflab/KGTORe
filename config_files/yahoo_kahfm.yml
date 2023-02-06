@@ -1,0 +1,38 @@
+experiment:
+  backend: tensorflow
+  data_config:
+    strategy: fixed
+    train_path: ../data/{0}/train.tsv
+    validation_path: ../data/{0}/val.tsv
+    test_path: ../data/{0}/test.tsv
+    side_information:
+      - dataloader: KAHFMLoader
+        kg_train: ../data/{0}/kahfm/kg.tsv
+  dataset: yahoo_movies
+  top_k: 10
+  evaluation:
+    cutoffs: [10]
+    simple_metrics: [nDCGRendle2020]
+  gpu: 0
+  external_models_path: ../external/models/__init__.py
+  models:
+    KaHFMEmbeddings:
+      meta:
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
+        verbose: True
+        save_recs: False
+        validation_rate: 1
+        validation_metric: nDCGRendle2020@10
+      epochs: 200
+      batch_size: 256
+      lr: [ loguniform, -9.210340372, -5.298317367 ]
+      l_w: [ loguniform, -11.512925465, -2.30258509299 ]
+      l_b: 0
+      loader: KAHFMLoader
+      seed: 123
+      early_stopping:
+        patience: 5
+        mode: auto
+        monitor: nDCGRendle2020@10
+        verbose: True

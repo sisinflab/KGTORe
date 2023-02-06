@@ -1,0 +1,38 @@
+experiment:
+  backend: tensorflow
+  data_config:
+    strategy: fixed
+    train_path: ../data/{0}/train.tsv
+    validation_path: ../data/{0}/val.tsv
+    test_path: ../data/{0}/test.tsv
+    side_information:
+      - dataloader: KGFlexLoader
+        item_features: ../data/{0}/kgflex/item_features.tsv
+  dataset: facebook_book
+  top_k: 10
+  evaluation:
+    cutoffs: [10]
+    simple_metrics: [nDCGRendle2020]
+  gpu: 0
+  external_models_path: ../external/models/__init__.py
+  models:
+    external.KGFlex:
+      meta:
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
+        verbose: True
+        save_recs: False
+        validation_rate: 1
+        validation_metric: nDCGRendle2020@10
+      lr: [loguniform, -5.2983173665, -2.30258509299]
+      embedding: [choice, [1,3,5]]
+      epochs: 200
+      max_features_per_user: [choice, [100,400,1000]]
+      batch_size: 64
+      loader: KGFlexLoader
+      seed: 123
+      early_stopping:
+        patience: 5
+        mode: auto
+        monitor: nDCGRendle2020@10
+        verbose: True

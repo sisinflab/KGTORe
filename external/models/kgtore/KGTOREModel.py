@@ -1,12 +1,10 @@
 from abc import ABC
-
 from .EdgeLayer import LGConv
 import torch
 import torch_geometric
 import numpy as np
 import random
 from torch_sparse import matmul
-import time
 from torch_scatter import scatter_add
 
 

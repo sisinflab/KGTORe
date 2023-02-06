@@ -1,0 +1,30 @@
+experiment:
+  backend: pytorch
+  data_config:
+    strategy: fixed
+    train_path: ../data/{0}/train.tsv
+    validation_path: ../data/{0}/val.tsv
+    test_path: ../data/{0}/test.tsv
+    side_information:
+      - dataloader: KAHFMLoader
+        kg_train: ../data/{0}/kahfm/kg.tsv
+  dataset: facebook_book
+  top_k: 50
+  evaluation:
+    cutoffs: [50]
+    simple_metrics: [nDCGRendle2020]
+  gpu: 0
+  external_models_path: ../external/models/__init__.py
+  models:
+    KaHFMEmbeddings:
+      meta:
+        verbose: True
+        save_recs: True
+        validation_rate: 19
+      epochs: 19
+      batch_size: 64
+      lr: 0.0005922750643212075
+      l_w: 0.02140563566611268
+      l_b: 0
+      loader: KAHFMLoader
+      seed: 123

@@ -1,0 +1,75 @@
+experiment:
+  backend: pytorch
+  data_config:
+    strategy: fixed
+    train_path: ../data/{0}/train.tsv
+    validation_path: ../data/{0}/val.tsv
+    test_path: ../data/{0}/test.tsv
+  dataset: yahoo_movies
+  top_k: 50
+  evaluation:
+    cutoffs: [50]
+    simple_metrics: [nDCGRendle2020]
+  gpu: 1
+  external_models_path: ../external/models/__init__.py
+  models:
+    MostPop:
+      meta:
+        verbose: True
+        save_recs: True
+    Random:
+      meta:
+        verbose: True
+        save_recs: True
+    external.BPRMF:
+      meta:
+        verbose: True
+        save_recs: True
+        validation_rate: 77
+      lr: 0.0011178906410471124
+      batch_size: 256
+      epochs: 77
+      factors: 64
+      l_w: 0.012631575298655093
+      seed: 123
+    EASER:
+      meta:
+        verbose: True
+        save_recs: True
+      l2_norm: 55.659333254382275
+    external.LightGCN:
+      meta:
+        verbose: True
+        save_recs: True
+        validation_rate: 27
+      lr: 0.0014217965357751648
+      epochs: 27
+      factors: 64
+      batch_size: 256
+      l_w: 0.05948528558207626
+      n_layers: 3
+      seed: 123
+    external.DGCF:
+      meta:
+        verbose: True
+        save_recs: True
+        validation_rate: 94
+      lr: 0.00022272775385254683
+      epochs: 94
+      factors: 64
+      batch_size: 256
+      l_w_bpr: 0.0003402025321070952
+      l_w_ind: 0.00010533228394991676
+      ind_batch_size: 256
+      n_layers: 1
+      routing_iterations: 2
+      intents: 4
+      seed: 123
+    ItemKNN:
+      meta:
+        verbose: True
+        save_weights: False
+        save_recs: True
+      neighbors: 50
+      similarity: cosine
+      seed: 123

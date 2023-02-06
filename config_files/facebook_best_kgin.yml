@@ -1,0 +1,38 @@
+experiment:
+  backend: tensorflow
+  data_config:
+    strategy: fixed
+    train_path: ../data/{0}/train.tsv
+    validation_path: ../data/{0}/val.tsv
+    test_path: ../data/{0}/test.tsv
+    side_information:
+      - dataloader: KGINTSVLoader
+        kg: ../data/{0}/kgin/kg.tsv
+  dataset: facebook_book
+  top_k: 50
+  evaluation:
+    cutoffs: [50]
+    simple_metrics: [nDCGRendle2020]
+  gpu: 0
+  external_models_path: ../external/models/__init__.py
+  models:
+    KGIN:
+      meta:
+        verbose: True
+        save_recs: True
+        validation_rate: 22
+      lr: 0.0004974556005249158
+      batch_size: 64
+      epochs: 22
+      l2: 0.053885509726367936
+      lfr: 0.008145222883360741
+      emb: 64
+      hops: 3
+      n_fac: 4
+      n_drop: True
+      n_drop_r: 0.5
+      m_drop: True
+      m_drop_r: 0.1
+      ind: distance
+      seed: 123
+      loader: KGINTSVLoader
