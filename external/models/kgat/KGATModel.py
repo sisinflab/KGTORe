@@ -58,9 +58,8 @@ class KGATModel(torch.nn.Module, ABC):
             [self.num_users + self.num_entities, self.num_users + self.num_entities]
         )
 
-        self.A_in = (
-            self.init_graph()
-        )
+        self.A_in = self.init_graph()
+        # self.A_in.requires_grad = False
 
         self.user_embedding = torch.nn.Embedding(self.num_users, self.embed_k)
         torch.nn.init.xavier_uniform_(self.user_embedding.weight)
@@ -182,7 +181,7 @@ class KGATModel(torch.nn.Module, ABC):
         indices = torch.cat([row, col], dim=0).view(2, -1)
         A_in = torch.sparse.FloatTensor(indices, kg_score, self.matrix_size).cpu()
         A_in = torch.sparse.softmax(A_in, dim=1).to(self.device)
-        self.A_in = A_in
+        self.A_in.data = A_in
 
     def train_step(self, batch, batch_kg):
 
