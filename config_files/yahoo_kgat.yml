@@ -1,0 +1,40 @@
+experiment:
+  backend: pytorch
+  data_config:
+    strategy: fixed
+    train_path: ../data/{0}/train.tsv
+    validation_path: ../data/{0}/val.tsv
+    test_path: ../data/{0}/test.tsv
+    side_information:
+      - dataloader: KGINTSVLoader
+        kg: ../data/{0}/kgat/kg.tsv
+  dataset: yahoo_movies
+  top_k: 10
+  evaluation:
+    cutoffs: [10]
+    simple_metrics: [nDCGRendle2020]
+  gpu: 0
+  external_models_path: ../external/models/__init__.py
+  models:
+    external.KGAT:
+      meta:
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
+        verbose: True
+        save_recs: False
+        validation_rate: 1
+        validation_metric: nDCGRendle2020@10
+      batch_size: 256
+      epochs: 200
+      lr: [ loguniform, -6.907755278, -2.995732273 ]
+      factors: 64
+      kg_factors: 64
+      lw: [ loguniform, -11.512925464, 4.605170185 ]
+      message_dropout: [ loguniform, -99.011158998, -0.223143551 ]
+      seed: 123
+      loader: KGINTSVLoader
+      early_stopping:
+        patience: 5
+        mode: auto
+        monitor: nDCGRendle2020@10
+        verbose: True
