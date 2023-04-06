@@ -18,21 +18,23 @@ experiment:
   models:
     external.KGAT:
       meta:
+        hyper_max_evals: 20
+        hyper_opt_alg: tpe
         verbose: True
-        save_recs: True
-        validation_rate: 22
-      lr: 0.0004974556005249158
+        save_recs: False
+        validation_rate: 1
+        validation_metric: nDCGRendle2020@10
       batch_size: 64
-      epochs: 22
-      l2: 0.053885509726367936
-      lfr: 0.008145222883360741
-      emb: 64
-      hops: 3
-      n_fac: 4
-      n_drop: True
-      n_drop_r: 0.5
-      m_drop: True
-      m_drop_r: 0.1
-      ind: distance
+      epochs: 200
+      lr: [ loguniform, -6.907755278, -2.995732273 ]
+      factors: 64
+      kg_factors: 64
+      lw: [ loguniform, -11.512925464, 4.605170185 ]
+      message_dropout: [ loguniform, -99.011158998, -0.223143551 ]
       seed: 123
       loader: KGINTSVLoader
+      early_stopping:
+        patience: 5
+        mode: auto
+        monitor: nDCGRendle2020@10
+        verbose: True
