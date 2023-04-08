@@ -27,7 +27,7 @@ class KGAT(RecMixin, BaseRecommenderModel):
             ("_factors", "factors", "factors", 64, int, None),
             ("_kg_factors", "kg_factors", "kg_factors", 64, int, None),
             ("_l_w", "l_w", "l_w", 0.01, float, None),
-            ("_aggr", "aggr", "aggr", 'gcn', str, None),
+            ("_aggr", "aggr", "aggr", 'bi', str, None),
             ("_weight_size", "weight_size", "weight_size", "(64,32,16)", lambda x: list(make_tuple(str(x))),
              lambda x: self._batch_remove(str(x), " []").replace(",", "-")),
             ("_message_dropout", "message_dropout", "message_dropout", 0.1, float, None),
