@@ -27,7 +27,7 @@ experiment:
       l_w: 0.00312734853526998
       alpha: 1.0
       beta: 0.1
-      epochs: 38
+      epochs: 200
       factors: 64
       l_ind: 0.054524737
       ind_edges: 0.001
