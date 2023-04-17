@@ -1,0 +1,37 @@
+experiment:
+  backend: pytorch
+  data_config:
+    strategy: fixed
+    train_path: ../data/{0}/train.tsv
+    validation_path: ../data/{0}/val.tsv
+    test_path: ../data/{0}/test.tsv
+    side_information:
+      - dataloader: KGTORETSVLoader
+        kg: ../data/{0}/kgtore/kg.tsv
+  dataset: yahoo_movies
+  top_k: 10
+  evaluation:
+    cutoffs: [10]
+    simple_metrics: [nDCGRendle2020]
+  gpu: 0
+  external_models_path: ../external/models/__init__.py
+  models:
+    external.KGTORE:
+      meta:
+        verbose: True
+        save_recs: True
+        validation_rate: 38
+      batch_size: 256
+      lr: 0.000664750387531533
+      elr: 0.00305727041704464
+      l_w: 0.00312734853526998
+      alpha: 1.0
+      beta: 0.1
+      epochs: 38
+      factors: 64
+      l_ind: 0.054524737
+      ind_edges: 0.001
+      n_layers: 3
+      npr: 20
+      loader: KGTORETSVLoader
+      seed: 123
