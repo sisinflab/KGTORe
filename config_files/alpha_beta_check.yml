@@ -9,7 +9,7 @@ experiment:
       - dataloader: KGTORETSVLoader
         kg: ../data/{0}/kgtore/kg.tsv
   dataset: yahoo_movies
-  top_k: 10
+  top_k: 50
   evaluation:
     cutoffs: [10]
     simple_metrics: [nDCGRendle2020]
