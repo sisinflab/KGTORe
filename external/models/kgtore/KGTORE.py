@@ -78,8 +78,8 @@ class KGTORE(RecMixin, BaseRecommenderModel):
 
         print(f'Number of KGTORE features: {self.edge_features.size(1)}')
 
-        self._alpha = 1 - self._alpha
-        self._beta = 1 - self._beta
+        self._alpha = round(1 - self._alpha, 2)
+        self._beta = round(1 - self._beta, 2)
 
         self._model = KGTOREModel(
             num_users=self._num_users,
