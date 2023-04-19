@@ -12,9 +12,9 @@ METRICS_TEMPLATE = """experiment:
     paired_ttest: True
     simple_metrics: [nDCGRendle2020, HR, Precision, Recall]
     complex_metrics:
-        - metric: clustered_nDCG
-        user_clustering_name: WarmColdUsers
-        user_clustering_file: ../data/{dataset}/users_deg.tsv
+      - metric: clustered_nDCG
+      user_clustering_name: WarmColdUsers
+      user_clustering_file: ../data/{dataset}/users_deg.tsv
   gpu: 0
   models:
     RecommendationFolder:  
