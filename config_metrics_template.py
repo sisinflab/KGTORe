@@ -14,7 +14,7 @@ METRICS_TEMPLATE = """experiment:
     complex_metrics:
       - metric: clustered_nDCG
         user_clustering_name: WarmColdUsers
-        user_clustering_file: ../data/{dataset}/users_deg.tsv
+        user_clustering_file: ../data/{dataset}/user_deg.tsv
   gpu: 0
   external_models_path: ../external/models/__init__.py
   models:
