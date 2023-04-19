@@ -2,9 +2,8 @@ from elliot.run import run_experiment
 from config_metrics_template import METRICS_TEMPLATE
 import os
 
-# RECS_FOLDER = os.path.abspath('./results/recs')
+RECS_FOLDER = os.path.abspath('./results/recs')
 CONFIG_DIR = './config_files'
-RECS_FOLDER = os.path.abspath('./results/yahoo_a_b')
 assert os.path.exists(RECS_FOLDER)
 assert os.path.exists(CONFIG_DIR)
 
@@ -13,7 +12,7 @@ recs_folder = RECS_FOLDER
 datasets = ['yahoo_movies']
 for dataset in datasets:
     print(f'Computing recs for {dataset}')
-    # recs_folder = os.path.join(RECS_FOLDER, dataset)
+    recs_folder = os.path.join(RECS_FOLDER, dataset)
     assert os.path.exists(recs_folder)
 
     config = METRICS_TEMPLATE.format(dataset=dataset, recs=recs_folder)
