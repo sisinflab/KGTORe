@@ -42,14 +42,19 @@ from elliot.evaluation.metrics.fairness.MAD import UserMADrating, ItemMADrating,
 from elliot.evaluation.metrics.fairness.BiasDisparity import BiasDisparityBR, BiasDisparityBS, BiasDisparityBD
 from elliot.evaluation.metrics.fairness.rsp import RSP
 from elliot.evaluation.metrics.fairness.reo import REO
-
+from elliot.evaluation.metrics.accuracy.ndcg import clustered_nDCG
+from elliot.evaluation.metrics.accuracy.recall import clustered_Recall
 from elliot.evaluation.metrics.statistical_array_metric import StatisticalMetric
+from elliot.evaluation.metrics.accuracy.precision import clustered_Precision
 
 _metric_dictionary = {
     "nDCG": nDCG,
     "nDCGRendle2020": nDCGRendle2020,
+    "clustered_nDCG": clustered_nDCG,
     "Precision": Precision,
+    "clustered_Precision": clustered_Precision,
     "Recall": Recall,
+    "clustered_Recall": clustered_Recall,
     "HR": HR,
     "MRR": MRR,
     "MAP": MAP,

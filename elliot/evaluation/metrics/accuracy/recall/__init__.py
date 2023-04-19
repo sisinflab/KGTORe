@@ -9,3 +9,4 @@ __author__ = 'Vito Walter Anelli, Claudio Pomo'
 __email__ = 'vitowalter.anelli@poliba.it, claudio.pomo@poliba.it'
 
 from .recall import Recall
+from .clustered_recall import clustered_Recall

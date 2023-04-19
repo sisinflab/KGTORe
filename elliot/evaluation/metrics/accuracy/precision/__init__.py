@@ -9,3 +9,4 @@ __author__ = 'Vito Walter Anelli, Claudio Pomo'
 __email__ = 'vitowalter.anelli@poliba.it, claudio.pomo@poliba.it'
 
 from .precision import Precision
+from .clustered_precision import clustered_Precision
