@@ -13,8 +13,8 @@ METRICS_TEMPLATE = """experiment:
     simple_metrics: [nDCGRendle2020, HR, Precision, Recall]
     complex_metrics:
       - metric: clustered_nDCG
-      user_clustering_name: WarmColdUsers
-      user_clustering_file: ../data/{dataset}/users_deg.tsv
+        user_clustering_name: WarmColdUsers
+        user_clustering_file: ../data/{dataset}/users_deg.tsv
   gpu: 0
   external_models_path: ../external/models/__init__.py
   models:
