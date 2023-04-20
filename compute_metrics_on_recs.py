@@ -2,7 +2,8 @@ from elliot.run import run_experiment
 from config_metrics_template import METRICS_TEMPLATE
 import os
 
-RECS_FOLDER = os.path.abspath('./results/recs')
+# RECS_FOLDER = os.path.abspath('./results/recs')
+RECS_FOLDER = os.path.abspath('./results/yahoo_movies/recs')
 CONFIG_DIR = './config_files'
 assert os.path.exists(RECS_FOLDER)
 assert os.path.exists(CONFIG_DIR)
