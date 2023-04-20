@@ -13,7 +13,8 @@ recs_folder = RECS_FOLDER
 datasets = ['yahoo_movies']
 for dataset in datasets:
     print(f'Computing recs for {dataset}')
-    recs_folder = os.path.join(RECS_FOLDER, dataset)
+    # recs_folder = os.path.join(RECS_FOLDER, dataset)
+    recs_folder = RECS_FOLDER
     assert os.path.exists(recs_folder)
 
     config = METRICS_TEMPLATE.format(dataset=dataset, recs=recs_folder)
