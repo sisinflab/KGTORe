@@ -15,6 +15,12 @@ METRICS_TEMPLATE = """experiment:
       - metric: clustered_nDCG
         user_clustering_name: WarmColdUsers
         user_clustering_file: ../data/{dataset}/user_deg.tsv
+      - metric: clustered_Precision
+        user_clustering_name: WarmColdUsers
+        user_clustering_file: ../data/{dataset}/user_deg.tsv
+      - metric: clustered_Recall
+        user_clustering_name: WarmColdUsers
+        user_clustering_file: ../data/{dataset}/user_deg.tsv
   gpu: 0
   external_models_path: ../external/models/__init__.py
   models:
