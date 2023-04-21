@@ -10,8 +10,8 @@ assert os.path.exists(RECS_FOLDER)
 assert os.path.exists(CONFIG_DIR)
 
 recs_folder = RECS_FOLDER
-datasets = ['facebook_book', 'yahoo_movies', 'movielens']
-# datasets = ['yahoo_movies']
+# datasets = ['facebook_book', 'yahoo_movies', 'movielens']
+datasets = ['yahoo_movies']
 for dataset in datasets:
     print(f'Computing recs for {dataset}')
     recs_folder = os.path.join(RECS_FOLDER, dataset)
