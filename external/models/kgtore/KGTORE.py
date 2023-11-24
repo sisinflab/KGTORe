@@ -44,7 +44,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         row, col = data.sp_i_train.nonzero()
-
+        print("KGTORE_Extension")
         try:
             name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + ".tsv"
             item_features_name = 'item_features' + str(self._npr) + "_" + str(self._criterion) + ".pk"
