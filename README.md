@@ -1,7 +1,7 @@
 # KG-TORE: Tailored recommendations through knowledge-aware GNN models
 
 This is the official implementation of the paper
-*KG-TORE: Tailored recommendations through knowledge-aware GNN models* accepted at *RecSys 2023*.
+[*KG-TORE: Tailored recommendations through knowledge-aware GNN models*](https://dl.acm.org/doi/10.1145/3604915.3608804) accepted at [*RecSys 2023*](https://recsys.acm.org/recsys23/accepted-contributions/).
 
 ## Table of Contents
 
