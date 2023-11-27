@@ -18,12 +18,9 @@ experiment:
   models:
     external.KGTORE:
       meta:
-        hyper_max_evals: 20
-        hyper_opt_alg: tpe
         verbose: True
-        save_recs: False
-        validation_rate: 1
-        validation_metric: nDCGRendle2020@10
+        save_recs: True
+        validation_rate: 2
       batch_size: 64
       lr: 0.000664750387531533
       elr: 0.00305727041704464
@@ -35,6 +32,6 @@ experiment:
       factors: 64
       ind_edges: 0.01
       n_layers: 3
-      npr: 20
+      npr: [1,2,3,5,10,20,40,100]
       loader: KGTORETSVLoader
       seed: 123

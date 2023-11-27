@@ -1,0 +1,14 @@
+senders:
+  - mail: emailsenderexpriments@gmail.com
+    pass: izptigbofjxrlspo
+
+receivers:
+  - alberto.mancino@poliba.it
+
+messages:
+  ok:
+    subject: Esperimento KGToreExtension è terminato
+    body: L'esperimento KGToreExtension è terminato con successo
+  error:
+    subject: Esperimento KGToreExtension su fallito
+    body: L'esperimento KGToreExtension è terminato con un errore
