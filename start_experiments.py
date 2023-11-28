@@ -3,6 +3,7 @@ import argparse
 
 parser = argparse.ArgumentParser(description="Run sample main.")
 parser.add_argument('--config', type=str, default='movielens_best_kgtore')
+parser.add_argument('--gpu', type=int, required=False)
 parser.add_argument('--mail', action='store_true')
 args = parser.parse_args()
 

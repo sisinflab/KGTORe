@@ -21,7 +21,6 @@ class KGAT(RecMixin, BaseRecommenderModel):
     def __init__(self, data, config, params, *args, **kwargs):
 
         ######################################
-
         self._params_list = [
             ("_learning_rate", "lr", "lr", 0.0005, float, None),
             ("_factors", "factors", "factors", 64, int, None),

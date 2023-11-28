@@ -35,9 +35,10 @@ print(u'''
          \\///////////////   \\/////////   \\/////////   \\///      \\/////          \\/////    
          ''')
 
-def run_experiment(config_path: str = ''):
+
+def run_experiment(config_path: str = '', **kwargs):
     print(f'Reading configuration file at \'{config_path}\'')
-    builder = NameSpaceBuilder(config_path, here, path.abspath(path.dirname(config_path)))
+    builder = NameSpaceBuilder(config_path, here, path.abspath(path.dirname(config_path)), **kwargs)
     base = builder.base
     config_test(builder, base)
     logging_project.init(base.base_namespace.path_logger_config, base.base_namespace.path_log_folder)
