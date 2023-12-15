@@ -45,7 +45,6 @@ class KGTORE(RecMixin, BaseRecommenderModel):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         row, col = data.sp_i_train.nonzero()
-        print("KGTORE_Extension")
         try:
             name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + ".tsv"
             item_features_name = 'item_features' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + ".pk"
@@ -71,8 +70,8 @@ class KGTORE(RecMixin, BaseRecommenderModel):
                                             npr=self._npr,
                                             depth=self._depth
                                             )
-            self.edge_features = Dec_Paths_class.edge_features
-            self.item_features = Dec_Paths_class.item_features
+            self.edge_features = Dec_Paths_class.edge_features  # n_transaction * n_features
+            self.item_features = Dec_Paths_class.item_features  # n_items * n_features
 
         col = [c + self._num_users for c in col]
         self.edge_index = np.array([list(row) + col, col + list(row)])
@@ -81,7 +80,6 @@ class KGTORE(RecMixin, BaseRecommenderModel):
         print(f'Number of KGTORE features: {self.edge_features.size(1)}')
 
         self._alpha = 1 - self._alpha
-        self._beta = 1 - self._beta
 
         self._model = KGTOREModel(
             num_users=self._num_users,
@@ -92,12 +90,8 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             embedding_size=self._factors,
             l_w=self._l_w,
             alpha=self._alpha,
-            beta=self._beta,
-            l_ind=self._l_ind,
-            ind_edges=self._ind_edges,
             n_layers=self._n_layers,
             edge_index=self.edge_index,
-            edge_features=self.edge_features,
             item_features=self.item_features,
             random_seed=self._seed
         )
