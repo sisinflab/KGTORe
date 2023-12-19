@@ -30,7 +30,7 @@ class KGAT(RecMixin, BaseRecommenderModel):
             ("_weight_size", "weight_size", "weight_size", "(64,32,16)", lambda x: list(make_tuple(str(x))),
              lambda x: self._batch_remove(str(x), " []").replace(",", "-")),
             ("_message_dropout", "message_dropout", "message_dropout", 0.1, float, None),
-            ("_loader", "loader", "loader", "KGINTSVLoader", None, None)
+            ("_loader", "loader", "loader", "KGATTSVLoader", None, None)
         ]
 
         self.autoset_params()
@@ -39,17 +39,79 @@ class KGAT(RecMixin, BaseRecommenderModel):
                                 **self._side.public_objects}
         self.private_entities = {**self._data.private_items, **self._side.private_objects}
         self.items = list(self._data.public_items.values())
-        mapped_subjects = list(itemgetter(*self._side.map_['subject'].tolist())(self.public_entities))
-        mapped_objects = list(itemgetter(*self._side.map_['object'].tolist())(self.public_entities))
-        mapped_relations = list(itemgetter(*self._side.map_['predicate'].tolist())(self._side.public_relations))
+        # mapped_subjects = list(itemgetter(*self._side.map_['subject'].tolist())(self.public_entities))
+        # mapped_objects = list(itemgetter(*self._side.map_['object'].tolist())(self.public_entities))
+        # mapped_relations = list(itemgetter(*self._side.map_['predicate'].tolist())(self._side.public_relations))
+        # kg_graph = pd.concat([pd.Series(mapped_subjects), pd.Series(mapped_relations), pd.Series(mapped_objects)],
+        #                      axis=1)
+        # kg_graph.columns = ['subject', 'predicate', 'object']
 
-        kg_graph = pd.concat([pd.Series(mapped_subjects), pd.Series(mapped_relations), pd.Series(mapped_objects)],
-                             axis=1)
-        kg_graph.columns = ['subject', 'predicate', 'object']
+        ### ver 2
+        kg_graph = self._side.map_.copy()
+        kg_graph = kg_graph.replace({"subject": self.public_entities})
+        kg_graph = kg_graph.replace({"object": self.public_entities})
+        kg_graph = kg_graph.replace({"predicate": self._side.public_relations})
+        # in realtà se consideriamo user come a gnn
+        # kg_graph['subject'] += self._num_users
+        # kg_graph['object'] += self._num_users
+
+        mapped_subjects = kg_graph['subject'].values
+        mapped_objects = kg_graph['object'].values
+        mapped_relations = kg_graph['predicate'].values
+
+
+        # add inverse kg data
+        #TODO: forse nel dataloader devo aggiungere un'altro +1 nei mapping ( per prevedere relazione like inversa)
+        inverse_kg_data = kg_graph.copy()
+        inverse_kg_data = inverse_kg_data.rename({'subject': 'object', 'object': 'subject'}, axis='columns')
+        inverse_kg_data['predicate'] += np.max(np.unique(mapped_relations)) #  ==  self._side.n_relations - 1== len( )
+
+        # full kg with inverse relations
+        full_kg = pd.concat([kg_graph, inverse_kg_data], axis=0 , ignore_index=True, sort=False)
+
+        # adding interactions to kg (collaborative filtering-KG)
+        users, items = self._data.sp_i_train.nonzero()
+        u_r_i = np.zeros((len(users), 3), dtype=np.int32)
+        u_r_i[:, 0] = users
+        u_r_i[:, 1] = 0 # 0 == like relation
+        u_r_i[:, 2] = items
+        # u_r_i = u_r_i.astype(np.int32)
+        cf2kg = pd.DataFrame(u_r_i, columns=['subject', 'predicate', 'object'])
+        cf2kg['object'] += self._num_users  # object == items ( agg n user s.t. id_items != id_users
+        # inverse relations
+        inverse_cf2kg = cf2kg.copy()
+        inverse_cf2kg = cf2kg.rename({'subject': 'object', 'object': 'subject'}, axis='columns')
+
+        # full cfkg
+        full_cfkg = pd.concat([cf2kg, inverse_cf2kg], axis=0, ignore_index=True, sort=False)
+
+        # full train kg
+        full_train_kg = pd.concat([full_kg, full_cfkg], ignore_index=True)
+
+
+
+
+
+
+        mapped_subjects = kg_graph['subject'].values
+        mapped_objects = kg_graph['object'].values
+        mapped_relations = kg_graph['predicate'].values
 
         self._sampler = Sampler(self._data.i_train_dict, kg_graph)
         if self._batch_size < 1:
             self._batch_size = self._num_users
+
+        ############# TODO:     JUST TRY
+        if self._restore:
+            return self.restore_weights()
+
+        for it in self.iterate(self._epochs):
+            loss = 0
+            steps = 0
+            with tqdm(total=int(self._data.transactions // self._batch_size), disable=not self._verbose) as t:
+                for batch, batch_kg in self._sampler.step(self._data.transactions, self._batch_size):
+                    steps += 1
+    ### END TRY
 
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 

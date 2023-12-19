@@ -29,11 +29,9 @@ experiment:
       elr: [ loguniform, -8.111728083, -3.506557897 ]
       l_w: [ loguniform, -8.111728083, -3.506557897 ]
       alpha: 0.9
-      beta: 0.1
       epochs: 100
       factors: 64
-      l_ind: [ loguniform, -10.126631104, -9.210340372 ]
-      ind_edges: 0.01
+      depth: 5
       n_layers: 3
       npr: 20
       loader: KGTORETSVLoader
