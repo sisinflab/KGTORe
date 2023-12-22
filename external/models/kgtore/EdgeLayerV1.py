@@ -31,5 +31,5 @@ class LGConv(MessagePassing):
     def message(self, x_j: Tensor, edge_weight, edge_attr: OptTensor, edge_attr_weight: OptTensor) -> Tensor:
         num_trans = x_j.shape[0] // 2
         x_j[num_trans:] = x_j[num_trans:] * self.alpha
-        return (edge_attr_weight.reshape(-1, 1) * edge_attr) + torch.mul(x_j, edge_weight.reshape(-1, 1))
+        return edge_attr + torch.mul(x_j, edge_weight.reshape(-1, 1))
 

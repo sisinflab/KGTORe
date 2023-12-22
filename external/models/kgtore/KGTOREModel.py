@@ -54,12 +54,12 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.items = self.cols[:self.num_interactions]
         self.items -= self.num_users
 
-        # row = self.edge_index[0]
-        # deg = scatter_add(torch.ones((self.edge_index.size(1), ), device=self.device), row, dim=0, dim_size=(self.edge_index.max() + 1))
-        # deg_inv = deg.pow_(-1)
-        # deg_inv.masked_fill_(deg_inv == float('inf'), 0)
-        # self.edge_attr_weight = deg_inv[row]
-        # self.edge_attr_weight[num_interactions:] = 1.   # first half , 2ndhalf == 1
+        row = self.edge_index[0]
+        deg = scatter_add(torch.ones((self.edge_index.size(1), ), device=self.device), row, dim=0, dim_size=(self.edge_index.max() + 1))
+        deg_inv = deg.pow_(-1)
+        deg_inv.masked_fill_(deg_inv == float('inf'), 0)
+        self.edge_attr_weight = deg_inv[row]
+        self.edge_attr_weight[num_interactions:] = 1.   # first half , 2ndhalf == 1
 
         # ADDITIVE OPTIONS
         self.a = alpha
@@ -103,32 +103,32 @@ class KGTOREModel(torch.nn.Module, ABC):
         # edge_embeddings.to(self.device)
         # edge_embeddings = torch.cat([edge_embeddings_u_i, edge_embeddings_i_u], dim=0).to(self.device)
 
-        # for layer in range(0, self.n_layers):
-        #     if evaluate:
-        #         self.propagation_network.eval()
-        #         with torch.no_grad():
-        #             all_embeddings += [list(
-        #                 self.propagation_network.children())[layer](
-        #                 all_embeddings[layer], self.edge_index, edge_embeddings, self.edge_attr_weight)
-        #             ]
-        #     else:
-        #         all_embeddings += [list(
-        #             self.propagation_network.children())[layer](
-        #             all_embeddings[layer], self.edge_index, edge_embeddings, self.edge_attr_weight)
-        #         ]
         for layer in range(0, self.n_layers):
             if evaluate:
                 self.propagation_network.eval()
                 with torch.no_grad():
                     all_embeddings += [list(
                         self.propagation_network.children())[layer](
-                        all_embeddings[layer], self.edge_index, edge_embeddings)
+                        all_embeddings[layer], self.edge_index, edge_embeddings, self.edge_attr_weight)
                     ]
             else:
                 all_embeddings += [list(
                     self.propagation_network.children())[layer](
-                    all_embeddings[layer], self.edge_index, edge_embeddings)
+                    all_embeddings[layer], self.edge_index, edge_embeddings, self.edge_attr_weight)
                 ]
+        # for layer in range(0, self.n_layers):
+        #     if evaluate:
+        #         self.propagation_network.eval()
+        #         with torch.no_grad():
+        #             all_embeddings += [list(
+        #                 self.propagation_network.children())[layer](
+        #                 all_embeddings[layer], self.edge_index, edge_embeddings)
+        #             ]
+        #     else:
+        #         all_embeddings += [list(
+        #             self.propagation_network.children())[layer](
+        #             all_embeddings[layer], self.edge_index, edge_embeddings)
+        #         ]
 
         if evaluate:
             self.propagation_network.train()
