@@ -26,7 +26,7 @@ experiment:
       elr: 0.00305727041704464
       l_w: 0.00312734853526998
       alpha: 0.9
-      beta: 0.1
+      depth: 5
       epochs: 8
       factors: 64
       l_ind: 0.0043878992507734
