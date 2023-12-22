@@ -92,11 +92,13 @@ class KGTOREModel(torch.nn.Module, ABC):
     def propagate_embeddings(self, evaluate=False):
 
 
-        edge_embeddings_i_u = matmul(self.item_features, self.F)[self.items] * (1-self.a)
+        # edge_embeddings_i_u = matmul(self.item_features, self.F)[self.items] * (1-self.a)
 
         ego_embeddings = torch.cat((self.Gu, self.Gi), 0).to(self.device)
         all_embeddings = [ego_embeddings]
-        edge_embeddings = edge_embeddings_i_u.to(self.device)
+        # edge_embeddings = edge_embeddings_i_u.to(self.device)
+        edge_embeddings = matmul(self.item_features, self.F)[self.items]  * (1-self.a)
+        edge_embeddings.to(self.device)
         # edge_embeddings = torch.cat([edge_embeddings_u_i, edge_embeddings_i_u], dim=0).to(self.device)
 
         # for layer in range(0, self.n_layers):
