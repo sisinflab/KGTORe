@@ -53,7 +53,6 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             self.edge_features, self.item_features = LoadEdgeFeatures(dataset_path, item_features_path, self._data.transactions)
             print("loaded edge features from: ", dataset_path, '\n')
         except:
-            print(f" \n \t Criterion: {self._criterion}")
             u_values, u_indices = np.unique(row, return_index=True)
             u_indices = np.append(u_indices, len(col))
             u_i_ordered_dict = {u_values[i]: col[u_indices[i]:u_indices[i + 1]] for i in range(len(u_values))}
