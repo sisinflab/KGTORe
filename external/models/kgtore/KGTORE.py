@@ -10,8 +10,8 @@ from elliot.recommender import BaseRecommenderModel
 from elliot.recommender.base_recommender_model import init_charger
 from elliot.recommender.recommender_utils_mixin import RecMixin
 from .KGTOREModel import KGTOREModel
-# from .DecisionPaths import DecisionPaths
-from .DecisionPathsDepth import DecisionPaths
+from .DecisionPaths import DecisionPaths
+# from .DecisionPathsDepth import DecisionPaths
 from .LoadEdgeFeatures import LoadEdgeFeatures
 
 
