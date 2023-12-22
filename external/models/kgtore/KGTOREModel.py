@@ -93,7 +93,7 @@ class KGTOREModel(torch.nn.Module, ABC):
 
 
         edge_embeddings_i_u = matmul(self.item_features, self.F)[self.items] * (1-self.a)
-        edge_embeddings_u_i = torch.zeros(self.num_interactions, self.embedding_size)
+        edge_embeddings_u_i = torch.zeros(self.num_interactions, self.embedding_size).to(self.device)
         edge_embeddings = torch.cat((edge_embeddings_u_i, edge_embeddings_i_u), 0).to(self.device)
 
         ego_embeddings = torch.cat((self.Gu, self.Gi), 0).to(self.device)
