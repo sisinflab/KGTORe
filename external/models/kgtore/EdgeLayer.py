@@ -31,9 +31,5 @@ class LGConv(MessagePassing):
     def message(self, x_j: Tensor, edge_weight, edge_attr: OptTensor, edge_attr_weight: OptTensor) -> Tensor:
         num_trans = x_j.shape[0] // 2
         x_j[num_trans:] = x_j[num_trans:] * self.alpha
-        # e_a = torch.zeros(x_j.shape[0], x_j.shape[1])  # edge_attr for items
-        # e_a[num_trans:] = edge_attr  # only for item
-        # print(f" \n e_a_device:{e_a.device} \t x_j_device: {x_j.device} \t edge_weight: {edge_weight.device}")
-        # return (edge_attr_weight.reshape(-1, 1) * edge_attr) + torch.mul(x_j, edge_weight.reshape(-1, 1))
         return edge_attr + torch.mul(x_j, edge_weight.reshape(-1, 1))
 
