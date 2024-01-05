@@ -30,7 +30,7 @@ TEMPLATE = '''experiment:
       epochs: 100
       factors: 64
       n_layers: 3
-      npr: 20
+      npr: 1
       loader: KGTORETSVLoader
       seed: 123
       early_stopping:
