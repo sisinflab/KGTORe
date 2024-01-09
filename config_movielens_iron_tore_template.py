@@ -1,4 +1,4 @@
-TEMPLATE = '''experiment:
+TEMPLATE  = '''experiment:
   backend: pytorch
   data_config:
     strategy: fixed

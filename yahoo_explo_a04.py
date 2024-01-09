@@ -11,7 +11,6 @@ assert os.path.exists(CONFIG_DIR)
 a = str(0.4)
 depths = [str(i) for i in [1, 2, 5, 10, 15, 20]]
 nprs = [str(i) for i in [1, 2, 5, 10, 20]]
-
 dataset = 'yahoo_movies'
 for npr in nprs:
     for depth in depths:
