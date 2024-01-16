@@ -35,6 +35,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             ("_npr", "npr", "npr", 10, int, None),
             ("_depth", "depth", "depth", None, None, None),
             ("_criterion", "criterion", "criterion", "entropy", str, None),
+            ("_seed", "seed", "seed", 10, int, None),
             ("_loader", "loader", "loader", "KGTORETSVLoader", None, None)
         ]
 
@@ -44,8 +45,8 @@ class KGTORE(RecMixin, BaseRecommenderModel):
 
         row, col = data.sp_i_train.nonzero()
         try:
-            name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + ".tsv"
-            item_features_name = 'item_features' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + ".pk"
+            name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(self._seed) + ".tsv"
+            item_features_name = 'item_features' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(self._seed) + ".pk"
             dataset_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', name))
             item_features_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', item_features_name))
             print(f'Looking for {dataset_path}')
@@ -66,7 +67,8 @@ class KGTORE(RecMixin, BaseRecommenderModel):
                                             df_name=config.dataset,
                                             criterion=self._criterion,
                                             npr=self._npr,
-                                            depth=self._depth
+                                            depth=self._depth,
+                                            seed=self._seed
                                             )
             self.edge_features = Dec_Paths_class.edge_features  # n_transaction * n_features
             self.item_features = Dec_Paths_class.item_features  # n_items * n_features
