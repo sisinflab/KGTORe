@@ -37,6 +37,7 @@ class DecisionPaths:
         self.criterion = criterion
         self.dataset_name = df_name
         self.depth = depth
+        self.seed = seed
         self._feature_to_private = None
         self.i_f = None
         self.train_dict = None
@@ -45,7 +46,7 @@ class DecisionPaths:
         self.edge_features = list()
         self.build_if(kg)
         self.build_decision_paths()  # for feature dev.
-        self.seed = seed
+
 
     def save_mapped_features(self, features_map):
         name = 'mapped_features' + str(self.npr) + "_" + str(self.criterion) + str(self.depth) + str(self.seed) + ".tsv"
