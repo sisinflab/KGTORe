@@ -30,9 +30,9 @@ experiment:
       epochs: 100
       factors: 64
       n_layers: 3
-      npr: [229, 364, 291, 485, 237, 266]
+      npr: [1, 2, 5, 10, 20, 40]
       loader: KGTORETSVLoader
-      seed: [1, 2, 3, 4, 5]
+      seed: [229, 364, 291, 485, 237, 266]
       depth: [5, 10, 15, 20, None]
       early_stopping:
         patience: 5
