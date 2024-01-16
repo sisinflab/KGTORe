@@ -16,7 +16,7 @@ def feature_path(data_name, depth, npr):
 
 result = []
 cols = ['npr', 'depth', 'avg_if', 'max_if', 'min_if']
-for depth in [1, 2, 5, 10, 20, -1]:
+for depth in [1, 2, 5, 10, 15, 20, -1]:
     for npr in [1, 2, 5, 10, 20]:
         path = feature_path(data_name=dataset_name, depth=depth, npr=npr)
         if os.path.exists(path):
