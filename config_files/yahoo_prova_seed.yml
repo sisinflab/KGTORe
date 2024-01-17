@@ -30,10 +30,10 @@ experiment:
       epochs: 100
       factors: 64
       n_layers: 3
-      npr: [2]
+      npr: [10]
       loader: KGTORETSVLoader
       seed: [485]
-      depth: [15]
+      depth: [10]
       early_stopping:
         patience: 5
         mode: auto
