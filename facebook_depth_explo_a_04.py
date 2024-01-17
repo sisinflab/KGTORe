@@ -8,8 +8,8 @@ assert os.path.exists(CONFIG_DIR)
 
 # datasets = ['facebook_book', 'yahoo_movies', 'movielens']
 # alphas = [str(i) for i in [0.4]]
-a = str(0.4)
-depths = [str(i)  for i in [1, 2, 5, 10, 15, 20]]
+a = str(0.6)
+depths = [str(i) for i in [1, 2, 5, 10, 15, 20]]
 nprs = [str(i) for i in [1, 2, 5, 10, 20]]
 
 dataset = 'facebook_book'
