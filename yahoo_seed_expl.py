@@ -9,9 +9,9 @@ assert os.path.exists(CONFIG_DIR)
 # datasets = ['facebook_book', 'yahoo_movies', 'movielens']
 # alphas = [str(i) for i in [0.4]]
 a = str(0.4)
+nprs = [str(i) for i in [2, 5, 10, 20]]
 depths = [str(i) for i in [1, 2, 5, 10, 15, 20, None]]
-nprs = [str(i) for i in [1, 2, 5, 10, 20]]
-seeds = [str(i) for i in [229, 364, 291, 485, 237, 266]]
+seeds = [str(i) for i in [229, 364, 291, 485, 237]]
 
 
 dataset = 'yahoo_movies'
