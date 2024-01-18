@@ -5,8 +5,8 @@ PATH = './prova/yahoo_seed'
 
 assert os.path.exists(PATH)
 
-parameters = ['seed', 'depth', 'npr']
-delimiter = '_'
+parameters = ['seed', 'depth', 'npr']  # param to save
+delimiter = '_'  # end of the parameter value
 metrics = ['nDCGRendle2020', 'HR', 'Precision', 'Recall', 'ItemCoverage', 'SEntropy', 'Gini']
 
 directory = os.fsencode(PATH)
