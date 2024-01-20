@@ -11,6 +11,7 @@ from elliot.recommender.base_recommender_model import init_charger
 from elliot.recommender.recommender_utils_mixin import RecMixin
 from .KGTOREModel import KGTOREModel
 from .DecisionPaths import DecisionPaths
+from .AblationItemFeautures import create_random_item_features, create_shuffled_item_features
 ## from .DecisionPathsDepth import DecisionPaths
 from .LoadEdgeFeatures import LoadEdgeFeatures
 
@@ -36,6 +37,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             ("_depth", "depth", "depth", None, None, None),
             ("_criterion", "criterion", "criterion", "entropy", str, None),
             ("_seed", "seed", "seed", 10, int, None),
+            ("_abl", "abl", "abl", None, None, None),
             ("_loader", "loader", "loader", "KGTORETSVLoader", None, None)
         ]
 
@@ -44,37 +46,46 @@ class KGTORE(RecMixin, BaseRecommenderModel):
         device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         row, col = data.sp_i_train.nonzero()
-        try:
-            name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(self._seed) + ".tsv"
-            item_features_name = 'item_features' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(self._seed) + ".pk"
-            dataset_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', name))
-            item_features_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', item_features_name))
-            print(f'Looking for {dataset_path}')
-            print(f'Looking for {item_features_path}')
-            self.edge_features, self.item_features = LoadEdgeFeatures(dataset_path, item_features_path, self._data.transactions)
-            print("loaded edge features from: ", dataset_path, '\n')
-        except:
-            if self._depth == str(None):
-                self._depth = None
 
-            u_values, u_indices = np.unique(row, return_index=True)
-            u_indices = np.append(u_indices, len(col))
-            u_i_ordered_dict = {u_values[i]: col[u_indices[i]:u_indices[i + 1]] for i in range(len(u_values))}
-            Dec_Paths_class = DecisionPaths(interactions=data.i_train_dict,
-                                            u_i_dict=u_i_ordered_dict,
-                                            kg=self._side.feature_map,
-                                            public_items=data.public_items,
-                                            public_users=data.public_users,
-                                            transaction=self._data.transactions,
-                                            device=device,
-                                            df_name=config.dataset,
-                                            criterion=self._criterion,
-                                            npr=self._npr,
-                                            depth=self._depth,
-                                            seed=self._seed
-                                            )
-            self.edge_features = Dec_Paths_class.edge_features  # n_transaction * n_features
-            self.item_features = Dec_Paths_class.item_features  # n_items * n_features
+        if self._abl == "random":
+            print(" \t \n Ablation study: random decision trees")
+            print(" \t \n Ablation study: random decision trees")
+            self.item_features = create_random_item_features(n_items=self._num_items, min_features=1, max_features=89, seed=self._seed)
+        else:
+            try:
+                name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(self._seed) + ".tsv"
+                item_features_name = 'item_features' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(self._seed) + ".pk"
+                dataset_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', name))
+                item_features_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', item_features_name))
+                print(f'Looking for {dataset_path}')
+                print(f'Looking for {item_features_path}')
+                self.edge_features, self.item_features = LoadEdgeFeatures(dataset_path, item_features_path, self._data.transactions)
+                print("loaded edge features from: ", dataset_path, '\n')
+            except:
+                if self._depth == str(None):
+                    self._depth = None
+
+                u_values, u_indices = np.unique(row, return_index=True)
+                u_indices = np.append(u_indices, len(col))
+                u_i_ordered_dict = {u_values[i]: col[u_indices[i]:u_indices[i + 1]] for i in range(len(u_values))}
+                Dec_Paths_class = DecisionPaths(interactions=data.i_train_dict,
+                                                u_i_dict=u_i_ordered_dict,
+                                                kg=self._side.feature_map,
+                                                public_items=data.public_items,
+                                                public_users=data.public_users,
+                                                transaction=self._data.transactions,
+                                                device=device,
+                                                df_name=config.dataset,
+                                                criterion=self._criterion,
+                                                npr=self._npr,
+                                                depth=self._depth,
+                                                seed=self._seed
+                                                )
+                self.edge_features = Dec_Paths_class.edge_features  # n_transaction * n_features
+                self.item_features = Dec_Paths_class.item_features  # n_items * n_features
+            if self._abl == "shuffled":
+                print(" \t \n Ablation study: shuffled decision trees")
+                self.item_features = create_shuffled_item_features(self.item_features, seed=self._seed)
 
 
         col = [c + self._num_users for c in col]

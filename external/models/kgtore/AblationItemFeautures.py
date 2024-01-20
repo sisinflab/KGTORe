@@ -37,7 +37,7 @@ def create_shuffled_item_features(old_item_features: torch_sparse.SparseTensor,
     random.seed(seed)
     rows = old_item_features.storage.row()
     items = old_item_features.storage.row().unique()
-    min_features = items.min()
+    min_features = 0 # items.min()
     max_features = items.max()
     sub = random.sample(range(min_features, max_features + 1), 10)
     sub_dict = {i: sub[i] for i in range(len(items))}
@@ -53,7 +53,4 @@ def create_shuffled_item_features(old_item_features: torch_sparse.SparseTensor,
     return item_features
 
 
-
-item_feat = create_random_item_features()
-create_shuffled_item_features(item_feat)
 
