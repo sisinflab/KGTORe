@@ -37,7 +37,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             ("_depth", "depth", "depth", None, None, None),
             ("_criterion", "criterion", "criterion", "entropy", str, None),
             ("_seed", "seed", "seed", 10, int, None),
-            ("_abl", "abl", "abl", None, None, None),
+            ("_abl", "abl", "abl", None, str, None),
             ("_loader", "loader", "loader", "KGTORETSVLoader", None, None)
         ]
 
