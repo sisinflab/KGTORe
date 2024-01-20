@@ -3,7 +3,6 @@ import numpy as np
 import torch
 import os
 
-
 from elliot.utils.write import store_recommendation
 from elliot.dataset.samplers import custom_sampler as cs
 from elliot.recommender import BaseRecommenderModel
@@ -11,7 +10,8 @@ from elliot.recommender.base_recommender_model import init_charger
 from elliot.recommender.recommender_utils_mixin import RecMixin
 from .KGTOREModel import KGTOREModel
 from .DecisionPaths import DecisionPaths
-from .AblationItemFeautures import create_random_item_features, create_shuffled_item_features, create_random_real_item_features
+from .AblationItemFeautures import create_random_item_features, create_shuffled_item_features, \
+    create_random_real_item_features, create_item_features_nofilter
 ## from .DecisionPathsDepth import DecisionPaths
 from .LoadEdgeFeatures import LoadEdgeFeatures
 
@@ -47,19 +47,27 @@ class KGTORE(RecMixin, BaseRecommenderModel):
 
         row, col = data.sp_i_train.nonzero()
 
-
-        if self._abl == "random":
+        if self._abl == "nofilter":
             print(" \t \n Ablation study: random decision trees")
-            self.item_features = create_random_real_item_features(knowledge_graph=self._side.feature_map, public_items=data.public_items, seed=self._seed)
+            self.item_features = create_item_features_nofilter(knowledge_graph=self._side.feature_map,
+                                                               public_items=data.public_items)
+        elif self._abl == "random":
+            print(" \t \n Ablation study: random decision trees")
+            self.item_features = create_random_real_item_features(knowledge_graph=self._side.feature_map,
+                                                                  public_items=data.public_items, seed=self._seed)
         else:
             try:
-                name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(self._seed) + ".tsv"
-                item_features_name = 'item_features' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(self._seed) + ".pk"
+                name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(
+                    self._seed) + ".tsv"
+                item_features_name = 'item_features' + str(self._npr) + "_" + str(self._criterion) + str(
+                    self._depth) + str(self._seed) + ".pk"
                 dataset_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', name))
-                item_features_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', item_features_name))
+                item_features_path = os.path.abspath(
+                    os.path.join('./data', config.dataset, 'kgtore', item_features_name))
                 print(f'Looking for {dataset_path}')
                 print(f'Looking for {item_features_path}')
-                self.edge_features, self.item_features = LoadEdgeFeatures(dataset_path, item_features_path, self._data.transactions)
+                self.edge_features, self.item_features = LoadEdgeFeatures(dataset_path, item_features_path,
+                                                                          self._data.transactions)
                 print("loaded edge features from: ", dataset_path, '\n')
             except:
                 if self._depth == str(None):
@@ -87,13 +95,11 @@ class KGTORE(RecMixin, BaseRecommenderModel):
                 print(" \t \n Ablation study: shuffled decision trees")
                 self.item_features = create_shuffled_item_features(self.item_features, seed=self._seed)
 
-
         col = [c + self._num_users for c in col]
         self.edge_index = np.array([list(row) + col, col + list(row)])
         self.num_interactions = row.shape[0]
 
         # print(f'Number of KGTORE features: {self.edge_features.size(1)}')
-
 
         self._model = KGTOREModel(
             num_users=self._num_users,
@@ -113,8 +119,8 @@ class KGTORE(RecMixin, BaseRecommenderModel):
     @property
     def name(self):
         return "KGTORE" \
-               + f"_{self.get_base_params_shortcut()}" \
-               + f"_{self.get_params_shortcut()}"
+            + f"_{self.get_base_params_shortcut()}" \
+            + f"_{self.get_params_shortcut()}"
 
     def train(self):
         if self._restore:
@@ -160,7 +166,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             self._results.append(result_dict)
 
             if it is not None:
-                self.logger.info(f'Epoch {(it + 1)}/{self._epochs} loss {loss/(it + 1):.5f}')
+                self.logger.info(f'Epoch {(it + 1)}/{self._epochs} loss {loss / (it + 1):.5f}')
             else:
                 self.logger.info(f'Finished')
 

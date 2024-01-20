@@ -11,8 +11,8 @@ assert os.path.exists(CONFIG_DIR)
 a = str(0.4)
 nprs = [str(i) for i in [1]]
 seeds = [str(i) for i in [229, 364, 291, 485, 237]]
-ablation_types = ["random", "shuffled"]
-
+# ablation_types = ["random", "shuffled"]
+ablation_types = ["nofilter"]
 
 dataset = 'yahoo_movies'
 for abl in ablation_types:

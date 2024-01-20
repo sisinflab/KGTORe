@@ -87,6 +87,23 @@ def create_random_real_item_features(knowledge_graph:pd.DataFrame, public_items:
     return item_features
 
 
+def create_item_features_nofilter(knowledge_graph:pd.DataFrame, public_items:dict) -> torch_sparse.SparseTensor:
+    i_f = build_if(knowledge_graph=knowledge_graph, public_items=public_items)
+    all_features = set(itertools.chain(*i_f.values()))
+    feature_to_private = {f: private for private, f in enumerate(all_features, 0)}
+    i_f = {i: set(list(map(feature_to_private.get, i_f[i]))) for i in i_f.keys()}
+    row_indices = [r for i in [[k] * len(v) for k, v in i_f.items()] for r in i]
+    col_indices = [r for i in [v for _, v in i_f.items()] for r in i]
+    item_features = torch_sparse.SparseTensor(row=torch.tensor(row_indices, dtype=torch.int64),
+                                              col=torch.tensor(col_indices, dtype=torch.int64),
+                                              value=torch.tensor([r for i in
+                                                                  [torch.ones(len(v)) / len(v) for _, v in
+                                                                   i_f.items()] for r in i],
+                                                                 dtype=torch.float64))
+    return item_features
+
+
+
 
 
 
