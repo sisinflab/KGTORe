@@ -11,7 +11,7 @@ from elliot.recommender.base_recommender_model import init_charger
 from elliot.recommender.recommender_utils_mixin import RecMixin
 from .KGTOREModel import KGTOREModel
 from .DecisionPaths import DecisionPaths
-from .AblationItemFeautures import create_random_item_features, create_shuffled_item_features
+from .AblationItemFeautures import create_random_item_features, create_shuffled_item_features, create_random_real_item_features
 ## from .DecisionPathsDepth import DecisionPaths
 from .LoadEdgeFeatures import LoadEdgeFeatures
 
@@ -47,10 +47,10 @@ class KGTORE(RecMixin, BaseRecommenderModel):
 
         row, col = data.sp_i_train.nonzero()
 
+
         if self._abl == "random":
             print(" \t \n Ablation study: random decision trees")
-            print(" \t \n Ablation study: random decision trees")
-            self.item_features = create_random_item_features(n_items=self._num_items, min_features=1, max_features=89, seed=self._seed)
+            self.item_features = create_random_real_item_features(knowledge_graph=self._side.feature_map, public_items=data.public_items, seed=self._seed)
         else:
             try:
                 name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(self._seed) + ".tsv"
