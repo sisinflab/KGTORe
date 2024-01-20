@@ -92,7 +92,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
         self.edge_index = np.array([list(row) + col, col + list(row)])
         self.num_interactions = row.shape[0]
 
-        print(f'Number of KGTORE features: {self.edge_features.size(1)}')
+        # print(f'Number of KGTORE features: {self.edge_features.size(1)}')
 
 
         self._model = KGTOREModel(
