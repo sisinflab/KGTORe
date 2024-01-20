@@ -48,7 +48,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
         row, col = data.sp_i_train.nonzero()
 
         if self._abl == "nofilter":
-            print(" \t \n Ablation study: random decision trees")
+            print(" \t \n Ablation study: no filter")
             self.item_features = create_item_features_nofilter(knowledge_graph=self._side.feature_map,
                                                                public_items=data.public_items)
         elif self._abl == "random":
