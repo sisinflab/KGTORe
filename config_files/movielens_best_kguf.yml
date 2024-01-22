@@ -22,7 +22,7 @@ experiment:
         save_recs: False
         validation_rate: 1
         validation_metric: nDCGRendle2020@10
-      batch_size: 256
+      batch_size: 2048
       lr: 7.543144888689546e-05
       elr: 0.0010396287107626598
       l_w: 0.007718511252995576
