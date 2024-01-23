@@ -26,6 +26,7 @@ class KGTOREModel(torch.nn.Module, ABC):
                  edge_features,
                  item_features,
                  random_seed,
+                 device,
                  name="KGTORE",
                  **kwargs
                  ):
@@ -39,7 +40,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         torch.cuda.manual_seed_all(random_seed)
         torch.backends.cudnn.deterministic = True
 
-        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = torch.device(device)
 
         self.num_users = num_users
         self.num_items = num_items

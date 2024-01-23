@@ -43,7 +43,9 @@ class KGTORE(RecMixin, BaseRecommenderModel):
 
         self.autoset_params()
         self._side = getattr(self._data.side_information, self._loader, None)
-        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        device_to_use = "cuda" if torch.cuda.is_available() else "mps" if torch.has_mps or torch.backends.mps.is_available() else "cpu"
+        print("Using device:", device_to_use)
+        device = torch.device(device_to_use)
 
         row, col = data.sp_i_train.nonzero()
         print("KGTORE_Extension")
@@ -104,7 +106,8 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             edge_index=self.edge_index,
             edge_features=self.edge_features,
             item_features=self.item_features,
-            random_seed=self._seed
+            random_seed=self._seed,
+            device=device_to_use
         )
 
     @property
