@@ -9,9 +9,9 @@ experiment:
       - dataloader: KGTORETSVLoader
         kg: ../data/{0}/kgtore/kg.tsv
   dataset: facebook_book
-  top_k: 50
+  top_k: 10
   evaluation:
-    cutoffs: [50]
+    cutoffs: [10]
     simple_metrics: [nDCGRendle2020]
   gpu: 0
   external_models_path: ../external/models/__init__.py

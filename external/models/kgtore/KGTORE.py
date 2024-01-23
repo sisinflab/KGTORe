@@ -44,7 +44,9 @@ class KGTORE(RecMixin, BaseRecommenderModel):
         self.autoset_params()
         self._side = getattr(self._data.side_information, self._loader, None)
         device_to_use = "cuda" if torch.cuda.is_available() else "mps" if torch.has_mps or torch.backends.mps.is_available() else "cpu"
+        # device_to_use = 'cpu'
         print("Using device:", device_to_use)
+
         device = torch.device(device_to_use)
 
         row, col = data.sp_i_train.nonzero()

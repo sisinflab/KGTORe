@@ -1,7 +1,9 @@
 def warn(*args, **kwargs):
     pass
 
+
 import warnings
+
 warnings.warn = warn
 
 import pickle
@@ -20,8 +22,6 @@ import multiprocessing as mp
 from collections import Counter
 
 mp.set_start_method('fork')
-
-
 
 
 class DecisionPaths:
@@ -47,7 +47,6 @@ class DecisionPaths:
         self.build_if(kg)
         self.build_decision_paths()  # for feature dev.
 
-
     def save_mapped_features(self, features_map):
         name = 'mapped_features' + str(self.npr) + "_" + str(self.criterion) + str(self.depth) + str(self.seed) + ".tsv"
         dataset_path = os.path.abspath(os.path.join('./data', self.dataset_name, 'kgtore', name))
@@ -62,7 +61,8 @@ class DecisionPaths:
     def save_item_features(self):
         # store item features
         item_feature_name = 'item_features' + str(self.npr) + "_" + str(self.criterion) + str(self.
-                                                                                              depth) + str(self.seed) + ".pk"
+                                                                                              depth) + str(
+            self.seed) + ".pk"
         item_features_path = os.path.abspath(os.path.join('./data', self.dataset_name, 'kgtore', item_feature_name))
         with open(item_features_path, 'wb') as file:
             pickle.dump(self.item_features, file)
@@ -120,7 +120,6 @@ class DecisionPaths:
 
         self.save_item_features()
 
-
         self.edge_features = SparseTensor(row=torch.tensor(index_list, dtype=torch.int64),
                                           col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),
                                                            dtype=torch.int64),
@@ -137,8 +136,10 @@ class DecisionPaths:
 
         print("Building decision trees")
         users = self.u_i_dict.keys()
-        args = ((u, set(self.interactions[u].keys()), self.u_i_dict[u], items, self.i_f, npr, criterion, depth, self.seed) for u in users)
-        n_procs = mp.cpu_count()-2
+        args = (
+        (u, set(self.interactions[u].keys()), self.u_i_dict[u], items, self.i_f, npr, criterion, depth, self.seed) for u
+        in users)
+        n_procs = mp.cpu_count() - 2
         print(f'Running multiprocessing with {n_procs} processes')
 
         with mp.Pool(n_procs) as pool:
@@ -150,9 +151,7 @@ class DecisionPaths:
         self.create_edge_features_matrix()
 
 
-
 def create_user_df(positive_items, negative_items, i_f, npr, random_seed=10):
-
     np.random.seed(random_seed)
     random.seed(random_seed)
 
@@ -175,8 +174,10 @@ def create_user_df(positive_items, negative_items, i_f, npr, random_seed=10):
     df['positive'] = df['item_id'].isin(positive_items).astype(int)
     return df
 
-def create_user_tree(df, npr, criterion, max_depth=None, random_seed = 0):
-    clf = DecisionTreeClassifier(criterion=criterion, class_weight={1: npr, 0: 1}, random_state=random_seed, max_depth=max_depth)
+
+def create_user_tree(df, npr, criterion, max_depth=None, random_seed=0):
+    clf = DecisionTreeClassifier(criterion=criterion, class_weight={1: npr, 0: 1}, random_state=random_seed,
+                                 max_depth=max_depth)
     X = csr_matrix(df.iloc[:, :-2].values)
     y = df.iloc[:, -1].values
     clf.fit(X, y)
@@ -200,7 +201,8 @@ def retrieve_decision_paths(df, clf, u, user_i_dict):
     return u_dp
 
 
-def user_decision_path(user, user_items, user_i_dict, items: set, item_features: dict, npr, criterion, depth, random_seed = 10):
+def user_decision_path(user, user_items, user_i_dict, items: set, item_features: dict, npr, criterion, depth,
+                       random_seed=10):
     df = create_user_df(user_items, set.difference(items, user_items), item_features, npr, random_seed=random_seed)
     clf = create_user_tree(df, npr, criterion, depth)
     u_dp = retrieve_decision_paths(df, clf, user, user_i_dict)
