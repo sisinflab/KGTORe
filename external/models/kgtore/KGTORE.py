@@ -35,7 +35,8 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             ("_ind_edges", "ind_edges", "ind_edges", 0.01, float, None),
             ("_n_layers", "n_layers", "n_layers", 1, int, None),
             ("_npr", "npr", "npr", 10, int, None),
-            ("_depth", "depth", "depth", 10, int, None),
+            ("_depth", "depth", "depth", None, None, None),
+            ("_seed", "seed", "seed", 10, int, None),
             ("_criterion", "criterion", "criterion", "entropy", str, None),
             ("_loader", "loader", "loader", "KGTORETSVLoader", None, None)
         ]
@@ -47,15 +48,22 @@ class KGTORE(RecMixin, BaseRecommenderModel):
         row, col = data.sp_i_train.nonzero()
         print("KGTORE_Extension")
         try:
-            name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + ".tsv"
-            item_features_name = 'item_features' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + ".pk"
+            name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(
+                self._seed) + ".tsv"
+            item_features_name = 'item_features' + str(self._npr) + "_" + str(self._criterion) + str(
+                self._depth) + str(self._seed) + ".pk"
             dataset_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', name))
-            item_features_path = os.path.abspath(os.path.join('./data', config.dataset, 'kgtore', item_features_name))
+            item_features_path = os.path.abspath(
+                os.path.join('./data', config.dataset, 'kgtore', item_features_name))
             print(f'Looking for {dataset_path}')
             print(f'Looking for {item_features_path}')
-            self.edge_features, self.item_features = LoadEdgeFeatures(dataset_path, item_features_path, self._data.transactions)
+            self.edge_features, self.item_features = LoadEdgeFeatures(dataset_path, item_features_path,
+                                                                      self._data.transactions)
             print("loaded edge features from: ", dataset_path, '\n')
         except:
+            if self._depth == str(None):
+                self._depth = None
+
             u_values, u_indices = np.unique(row, return_index=True)
             u_indices = np.append(u_indices, len(col))
             u_i_ordered_dict = {u_values[i]: col[u_indices[i]:u_indices[i + 1]] for i in range(len(u_values))}
@@ -69,20 +77,17 @@ class KGTORE(RecMixin, BaseRecommenderModel):
                                             df_name=config.dataset,
                                             criterion=self._criterion,
                                             npr=self._npr,
-                                            depth=self._depth
+                                            depth=self._depth,
+                                            seed=self._seed
                                             )
-            self.edge_features = Dec_Paths_class.edge_features
-            self.item_features = Dec_Paths_class.item_features
+            self.edge_features = Dec_Paths_class.edge_features  # n_transaction * n_features
+            self.item_features = Dec_Paths_class.item_features  # n_items * n_features
 
         col = [c + self._num_users for c in col]
         self.edge_index = np.array([list(row) + col, col + list(row)])
         self.num_interactions = row.shape[0]
 
         print(f'Number of KGTORE features: {self.edge_features.size(1)}')
-
-        self._alpha = 1 - self._alpha
-        self._beta = 1 - self._beta
-
         self._model = KGTOREModel(
             num_users=self._num_users,
             num_items=self._num_items,

@@ -21,12 +21,12 @@ from collections import Counter
 
 mp.set_start_method('fork')
 
-seed = 0
+
 
 
 class DecisionPaths:
     def __init__(self, interactions, u_i_dict, kg, public_items, public_users, transaction, device, df_name, npr=10,
-                 criterion='entropy', depth=10):
+                 criterion='entropy', depth=10, seed=10):
         self.interactions = interactions
         self.public_items = public_items
         self.public_users = public_users
@@ -37,6 +37,7 @@ class DecisionPaths:
         self.criterion = criterion
         self.dataset_name = df_name
         self.depth = depth
+        self.seed = seed
         self._feature_to_private = None
         self.i_f = None
         self.train_dict = None
@@ -46,21 +47,22 @@ class DecisionPaths:
         self.build_if(kg)
         self.build_decision_paths()  # for feature dev.
 
+
     def save_mapped_features(self, features_map):
-        name = 'mapped_features' + str(self.npr) + "_" + str(self.criterion) + str(self.depth) + ".tsv"
+        name = 'mapped_features' + str(self.npr) + "_" + str(self.criterion) + str(self.depth) + str(self.seed) + ".tsv"
         dataset_path = os.path.abspath(os.path.join('./data', self.dataset_name, 'kgtore', name))
         features_map.to_csv(dataset_path, sep='\t', header=False, index=False)
         print(f'Mapped features stored at {dataset_path}')
 
     def save_edge_features_df(self, edge_feature_df):
-        name = 'decision_path' + str(self.npr) + "_" + str(self.criterion) + str(self.depth) + ".tsv"
+        name = 'decision_path' + str(self.npr) + "_" + str(self.criterion) + str(self.depth) + str(self.seed) + ".tsv"
         dataset_path = os.path.abspath(os.path.join('./data', self.dataset_name, 'kgtore', name))
         edge_feature_df.to_csv(dataset_path, sep='\t', header=False, index=False)
 
     def save_item_features(self):
         # store item features
         item_feature_name = 'item_features' + str(self.npr) + "_" + str(self.criterion) + str(self.
-                                                                                              depth) + ".pk"
+                                                                                              depth) + str(self.seed) + ".pk"
         item_features_path = os.path.abspath(os.path.join('./data', self.dataset_name, 'kgtore', item_feature_name))
         with open(item_features_path, 'wb') as file:
             pickle.dump(self.item_features, file)
@@ -135,7 +137,7 @@ class DecisionPaths:
 
         print("Building decision trees")
         users = self.u_i_dict.keys()
-        args = ((u, set(self.interactions[u].keys()), self.u_i_dict[u], items, self.i_f, npr, criterion, depth) for u in users)
+        args = ((u, set(self.interactions[u].keys()), self.u_i_dict[u], items, self.i_f, npr, criterion, depth, self.seed) for u in users)
         n_procs = mp.cpu_count()-2
         print(f'Running multiprocessing with {n_procs} processes')
 
@@ -149,7 +151,7 @@ class DecisionPaths:
 
 
 
-def create_user_df(positive_items, negative_items, i_f, npr, random_seed=42):
+def create_user_df(positive_items, negative_items, i_f, npr, random_seed=10):
 
     np.random.seed(random_seed)
     random.seed(random_seed)
@@ -173,8 +175,8 @@ def create_user_df(positive_items, negative_items, i_f, npr, random_seed=42):
     df['positive'] = df['item_id'].isin(positive_items).astype(int)
     return df
 
-def create_user_tree(df, npr, criterion, max_depth=None):
-    clf = DecisionTreeClassifier(criterion=criterion, class_weight={1: npr, 0: 1}, random_state=seed, max_depth=max_depth)
+def create_user_tree(df, npr, criterion, max_depth=None, random_seed = 0):
+    clf = DecisionTreeClassifier(criterion=criterion, class_weight={1: npr, 0: 1}, random_state=random_seed, max_depth=max_depth)
     X = csr_matrix(df.iloc[:, :-2].values)
     y = df.iloc[:, -1].values
     clf.fit(X, y)
@@ -198,8 +200,8 @@ def retrieve_decision_paths(df, clf, u, user_i_dict):
     return u_dp
 
 
-def user_decision_path(user, user_items, user_i_dict, items: set, item_features: dict, npr, criterion, depth):
-    df = create_user_df(user_items, set.difference(items, user_items), item_features, npr)
+def user_decision_path(user, user_items, user_i_dict, items: set, item_features: dict, npr, criterion, depth, random_seed = 10):
+    df = create_user_df(user_items, set.difference(items, user_items), item_features, npr, random_seed=random_seed)
     clf = create_user_tree(df, npr, criterion, depth)
     u_dp = retrieve_decision_paths(df, clf, user, user_i_dict)
     return u_dp

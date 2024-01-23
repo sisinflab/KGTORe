@@ -21,7 +21,6 @@ def LoadEdgeFeatures(path, item_features_path, transactions):
     #edge_features['val'] = ss['val'] * edge_features['val']
 
     # edge_features['val'] = abs(edge_features['val'])
-    print()
     return SparseTensor(row=torch.tensor(edge_features['interaction'], dtype=torch.int64),
                                       col=torch.tensor(edge_features['feature'].astype(int).to_numpy(),
                                                        dtype=torch.int64),

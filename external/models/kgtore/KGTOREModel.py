@@ -61,7 +61,8 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.items -= self.num_users
 
         row = self.edge_index[0]
-        deg = scatter_add(torch.ones((self.edge_index.size(1), ), device=self.device), row, dim=0, dim_size=(self.edge_index.max() + 1))
+        deg = scatter_add(torch.ones((self.edge_index.size(1),), device=self.device), row, dim=0,
+                          dim_size=(self.edge_index.max() + 1))
         deg_inv = deg.pow_(-1)
         deg_inv.masked_fill_(deg_inv == float('inf'), 0)
         self.edge_attr_weight = deg_inv[row]
@@ -86,8 +87,9 @@ class KGTOREModel(torch.nn.Module, ABC):
 
         propagation_network_list = []
         for layer in range(self.n_layers):
-            propagation_network_list.append((LGConv(alpha=self.a, beta=self.b), 'x, edge_index -> x'))
-        self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list).to(self.device)
+            propagation_network_list.append((LGConv(alpha=(1 - self.a), beta=(1 - self.b)), 'x, edge_index -> x'))
+        self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list).to(
+            self.device)
 
         self.softplus = torch.nn.Softplus()
 
@@ -104,11 +106,10 @@ class KGTOREModel(torch.nn.Module, ABC):
             self.edge_path[e] = self.edge_features[e].storage._col
             self.edge_len[e] = len(self.edge_path[e])
 
-
     def propagate_embeddings(self, evaluate=False):
 
-        edge_embeddings_u_i = matmul(self.edge_features, self.F) * (1 - self.b)
-        edge_embeddings_i_u = matmul(self.item_features, self.F)[self.items] * (1-self.a)
+        edge_embeddings_u_i = matmul(self.edge_features, self.F) * self.b
+        edge_embeddings_i_u = matmul(self.item_features, self.F)[self.items] * self.a
 
         ego_embeddings = torch.cat((self.Gu, self.Gi), 0).to(self.device)
         all_embeddings = [ego_embeddings]
@@ -161,7 +162,8 @@ class KGTOREModel(torch.nn.Module, ABC):
         # independence loss over the features within the same path
         if self.l_ind > 0:
             selected_edges = random.sample(list(range(self.num_interactions)), self.n_selected_edges)
-            ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_path[e]])).sum() - self.edge_len[e] for e in selected_edges]
+            ind_loss = [torch.abs(torch.corrcoef(self.F[self.edge_path[e]])).sum() - self.edge_len[e] for e in
+                        selected_edges]
             ind_loss = sum(ind_loss) / self.n_selected_edges * self.l_ind
 
         loss = bpr_loss + reg_loss
