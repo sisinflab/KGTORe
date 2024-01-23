@@ -12,7 +12,7 @@ TEMPLATE = '''experiment:
   top_k: 10
   evaluation:
     cutoffs: [10]
-    simple_metrics: [nDCGRendle2020]
+    simple_metrics: [nDCGRendle2020, HR, Precision, Recall, ItemCoverage, SEntropy, Gini]
   gpu: 0
   external_models_path: ../external/models/__init__.py
   models:
