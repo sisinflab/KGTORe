@@ -137,7 +137,7 @@ class KGTOREModel(torch.nn.Module, ABC):
             unique, no_times = torch.tensor(users_inter, dtype=torch.int64).unique(return_counts=True)
             no_times = [[1 / int(i)] * i for i in no_times]
             no_times = list(itertools.chain(*no_times))
-            self.u_f = SparseTensor(row=torch.tensor(users_inter, dtype=torch.int64, device=self.device),
+            self.uf = SparseTensor(row=torch.tensor(users_inter, dtype=torch.int64, device=self.device),
                                     col=torch.arange(users_inter.shape[0], dtype=torch.int64, device=self.device),
                                     value=torch.tensor(no_times, dtype=torch.float64, device=self.device)).to(self.device)
 
