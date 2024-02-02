@@ -73,7 +73,6 @@ class BaseRecommenderModel(ABC):
                             f"is later than the overall number of epochs ({self._epochs}).")
         self._batch_size = getattr(self._params, "batch_size", -1)
 
-
         self.best_metric_value = 0
 
         self._losses = []
@@ -88,7 +87,11 @@ class BaseRecommenderModel(ABC):
                          ])
 
     def get_params_shortcut(self):
-        return "_".join([str(p[2])+"="+ str(p[5](getattr(self, p[0])) if p[5] else getattr(self, p[0])).replace(".", "$") for p in self._params_list])
+        return "_".join([str(p[2]) +
+                         "=" +
+                         str(p[5](getattr(self, p[0]))
+                             if p[5] else getattr(self, p[0])).replace(".", "$")
+                         for p in self._params_list])
 
     def autoset_params(self):
         """
@@ -158,6 +161,7 @@ def init_charger(init):
         self.evaluator = Evaluator(self._data, self._params)
         self._params.name = self.name
         build_model_folder(self._config.path_output_rec_weight, self.name)
-        self._saving_filepath = os.path.abspath(os.sep.join([self._config.path_output_rec_weight, self.name, f"best-weights-{self.name}"]))
+        self._saving_filepath = os.path.abspath(
+            os.sep.join([self._config.path_output_rec_weight, self.name, f"best-weights-{self.name}"]))
 
     return new_init

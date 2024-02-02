@@ -28,21 +28,21 @@ class KGTORE(RecMixin, BaseRecommenderModel):
         ######################################
 
         self._params_list = [
-            ("_lr", "lr", "lr", 0.0005, float, None),
-            ("_elr", "elr", "elr", 0.0005, float, None),
-            ("_factors", "factors", "factors", 64, int, None),
-            ("_l_w", "l_w", "l_w", 0.01, float, None),
-            ("_alpha", "alpha", "alpha", 0.5, float, None),
-            ("_beta", "beta", "beta", 0.5, float, None),
-            ("_l_ind", "l_ind", "l_ind", 0.5, float, None),
-            ("_ind_edges", "ind_edges", "ind_edges", 0.01, float, None),
-            ("_n_layers", "n_layers", "n_layers", 1, int, None),
+            ("_lr", "lr", "lr", 0.0005, float, lambda x: "{:.3g}".format(x)),
+            ("_elr", "elr", "elr", 0.0005, float, lambda x: "{:.3g}".format(x)),
+            ("_factors", "f", "factors", 64, int, None),
+            ("_l_w", "l_w", "l_w", 0.01, float, lambda x: "{:.3g}".format(x)),
+            ("_alpha", "alpha", "a", 0.5, float, None),
+            ("_beta", "beta", "b", 0.5, float, None),
+            ("_l_ind", "l_ind", "li", 0.5, float, lambda x: "{:.3g}".format(x)),
+            ("_ind_edges", "ind_edges", "ie", 0.01, float, None),
+            ("_n_layers", "n_layers", "nl", 1, int, None),
             ("_npr", "npr", "npr", 10, int, None),
-            ("_depth", "depth", "depth", None, None, None),
-            ("_seed", "seed", "seed", 10, int, None),
-            ("_criterion", "criterion", "criterion", "entropy", str, None),
-            ("_aggr", "aggr", "aggr", "std", str, None),
-            ("_loader", "loader", "loader", "KGTORETSVLoader", None, None)
+            ("_depth", "depth", "d", None, None, None),
+            ("_seed", "seed", "s", 10, int, None),
+            ("_criterion", "criterion", "crt", "entropy", str, None),
+            ("_aggr", "aggr", "ag", "std", str, None),
+            ("_loader", "loader", "ldr", "KGTORETSVLoader", None, lambda x: x[0])
         ]
 
         self.autoset_params()
