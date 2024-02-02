@@ -1,10 +1,13 @@
 from abc import ABC
-from .EdgeLayer import LGConv
+from .EdgeLayer import KGTOReConv
+from torch_geometric.nn import LGConv
+import itertools
 import torch
 import torch_geometric
 import numpy as np
 import random
 from torch_sparse import matmul
+from torch_sparse import SparseTensor
 from torch_scatter import scatter_add
 
 
@@ -25,6 +28,7 @@ class KGTOREModel(torch.nn.Module, ABC):
                  edge_index,
                  edge_features,
                  item_features,
+                 aggr,
                  random_seed,
                  device,
                  name="KGTORE",
@@ -56,6 +60,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.edge_index = torch.tensor(edge_index, dtype=torch.int64, device=self.device)
         self.edge_features = edge_features.to(self.device)
         self.item_features = item_features.to(self.device)
+        self.aggr = aggr
 
         _, self.cols = self.edge_index.clone()
         self.items = self.cols[:self.num_interactions]
@@ -86,11 +91,10 @@ class KGTOREModel(torch.nn.Module, ABC):
         self.F = torch.nn.Parameter(
             torch.nn.init.xavier_normal_(torch.empty((self.feature_dim, self.embedding_size))).to(self.device))
 
-        propagation_network_list = []
-        for layer in range(self.n_layers):
-            propagation_network_list.append((LGConv(alpha=(1 - self.a), beta=(1 - self.b)), 'x, edge_index -> x'))
-        self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list).to(
-            self.device)
+        # create parameters according to model-type
+        self.propagation_network = None
+        self.uf = None
+        self.create_adhoc_parameters()
 
         self.softplus = torch.nn.Softplus()
 
@@ -107,35 +111,86 @@ class KGTOREModel(torch.nn.Module, ABC):
             self.edge_path[e] = self.edge_features[e].storage._col
             self.edge_len[e] = len(self.edge_path[e])
 
+    def create_adhoc_parameters(self) -> None:
+        propagation_network_list = []
+        if self.aggr == 'std':
+            # create std propagation network
+            for layer in range(self.n_layers):
+                propagation_network_list.append(
+                    (KGTOReConv(alpha=(1 - self.a), beta=(1 - self.b)), 'x, edge_index -> x'))
+            self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list).to(
+                self.device)
+        elif self.aggr == 'zero':
+            # create zero propagation network
+            for layer in range(self.n_layers):
+                propagation_network_list.append((LGConv(), 'x, edge_index -> x'))
+            self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list).to(
+                self.device)
+            # create matrix to sum user-decision path
+            users_inter = self.edge_index[0][:self.num_interactions]
+            unique, no_times = torch.tensor(users_inter, dtype=torch.int64).unique(return_counts=True)
+            no_times = [[1 / int(i)] * i for i in no_times]
+            no_times = list(itertools.chain(*no_times))
+            self.u_f = SparseTensor(row=torch.tensor(users_inter, dtype=torch.int64),
+                                    col=torch.arange(users_inter.shape[0], dtype=torch.int64),
+                                    value=torch.tensor(no_times, dtype=torch.float64)).to(self.device)
+        return None
+
     def propagate_embeddings(self, evaluate=False):
+        if self.aggr == 'std':
+            edge_embeddings_u_i = matmul(self.edge_features, self.F) * self.b
+            edge_embeddings_i_u = matmul(self.item_features, self.F)[self.items] * self.a
 
-        edge_embeddings_u_i = matmul(self.edge_features, self.F) * self.b
-        edge_embeddings_i_u = matmul(self.item_features, self.F)[self.items] * self.a
+            ego_embeddings = torch.cat((self.Gu, self.Gi), 0).to(self.device)
+            all_embeddings = [ego_embeddings]
+            edge_embeddings = torch.cat([edge_embeddings_u_i, edge_embeddings_i_u], dim=0).to(self.device)
 
-        ego_embeddings = torch.cat((self.Gu, self.Gi), 0).to(self.device)
-        all_embeddings = [ego_embeddings]
-        edge_embeddings = torch.cat([edge_embeddings_u_i, edge_embeddings_i_u], dim=0).to(self.device)
-
-        for layer in range(0, self.n_layers):
-            if evaluate:
-                self.propagation_network.eval()
-                with torch.no_grad():
+            for layer in range(0, self.n_layers):
+                if evaluate:
+                    self.propagation_network.eval()
+                    with torch.no_grad():
+                        all_embeddings += [list(
+                            self.propagation_network.children())[layer](
+                            all_embeddings[layer], self.edge_index, edge_embeddings, self.edge_attr_weight)
+                        ]
+                else:
                     all_embeddings += [list(
                         self.propagation_network.children())[layer](
                         all_embeddings[layer], self.edge_index, edge_embeddings, self.edge_attr_weight)
                     ]
-            else:
-                all_embeddings += [list(
-                    self.propagation_network.children())[layer](
-                    all_embeddings[layer], self.edge_index, edge_embeddings, self.edge_attr_weight)
-                ]
 
-        if evaluate:
-            self.propagation_network.train()
+            if evaluate:
+                self.propagation_network.train()
 
-        all_embeddings = sum([all_embeddings[k] * self.alpha[k] for k in range(len(all_embeddings))])
-        gu, gi = torch.split(all_embeddings, [self.num_users, self.num_items], 0)
+            all_embeddings = sum([all_embeddings[k] * self.alpha[k] for k in range(len(all_embeddings))])
+            gu, gi = torch.split(all_embeddings, [self.num_users, self.num_items], 0)
+        elif self.aggr == 'zero':
+            Gi = matmul(self.item_features, self.F) + self.Gi  # * self.a
+            Gi.to(self.device)
+            Gu = self.Gu + matmul(self.uf, matmul(self.edge_features, self.F))
+            Gu.to(self.device)
+            ego_embeddings = torch.cat((Gu, Gi), 0).to(self.device)
+            all_embeddings = [ego_embeddings]
+            for layer in range(0, self.n_layers):
+                if evaluate:
+                    self.propagation_network.eval()
+                    with torch.no_grad():
+                        all_embeddings += [list(
+                            self.propagation_network.children())[layer](
+                            all_embeddings[layer], self.edge_index)
+                        ]
+                else:
+                    all_embeddings += [list(
+                        self.propagation_network.children())[layer](
+                        all_embeddings[layer], self.edge_index)
+                    ]
 
+            if evaluate:
+                self.propagation_network.train()
+            all_embeddings = sum([all_embeddings[k] * self.alpha[k] for k in range(len(all_embeddings))])
+            gu, gi = torch.split(all_embeddings, [self.num_users, self.num_items], 0)
+        else:
+            raise NotImplementedError
         return gu.to(self.device), gi.to(self.device)
 
     def forward(self, inputs, **kwargs):

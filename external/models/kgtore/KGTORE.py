@@ -17,6 +17,9 @@ from .LoadEdgeFeatures import LoadEdgeFeatures
 class KGTORE(RecMixin, BaseRecommenderModel):
     @init_charger
     def __init__(self, data, config, params, *args, **kwargs):
+        '''
+        _aggr: Aggregation type [standard (std), zero (only at layer zero)]
+        '''
 
         self._sampler = cs.Sampler(self._data.i_train_dict)
         if self._batch_size < 1:
@@ -38,18 +41,16 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             ("_depth", "depth", "depth", None, None, None),
             ("_seed", "seed", "seed", 10, int, None),
             ("_criterion", "criterion", "criterion", "entropy", str, None),
+            ("_aggr", "aggr", "aggr", "std", str, None),
             ("_loader", "loader", "loader", "KGTORETSVLoader", None, None)
         ]
 
         self.autoset_params()
         self._side = getattr(self._data.side_information, self._loader, None)
-        device_to_use = "cuda" if torch.cuda.is_available() else "mps" if torch.has_mps or torch.backends.mps.is_available() else "cpu"
-        # device_to_use = 'cpu'
-        print("Using device:", device_to_use)
-
-        device = torch.device(device_to_use)
+        device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         row, col = data.sp_i_train.nonzero()
+
         print("KGTORE_Extension")
         try:
             name = 'decision_path' + str(self._npr) + "_" + str(self._criterion) + str(self._depth) + str(
@@ -108,8 +109,9 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             edge_index=self.edge_index,
             edge_features=self.edge_features,
             item_features=self.item_features,
+            aggr=self._aggr,
             random_seed=self._seed,
-            device=device_to_use
+            device=device
         )
 
     @property

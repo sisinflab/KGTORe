@@ -7,7 +7,7 @@ from torch_geometric.nn.conv.gcn_conv import gcn_norm
 from torch_geometric.typing import Adj, OptTensor
 
 
-class LGConv(MessagePassing):
+class KGTOReConv(MessagePassing):
     def __init__(self, alpha, beta, normalize: bool = True, **kwargs):
         kwargs.setdefault('aggr', 'add')
         super().__init__(**kwargs)
