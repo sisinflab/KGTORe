@@ -94,6 +94,7 @@ class KGTOREModel(torch.nn.Module, ABC):
         # create parameters according to model-type
         self.propagation_network = None
         self.uf = None
+        self.adj_sparse = None
         self.create_adhoc_parameters()
 
         self.softplus = torch.nn.Softplus()
@@ -134,6 +135,11 @@ class KGTOREModel(torch.nn.Module, ABC):
             self.u_f = SparseTensor(row=torch.tensor(users_inter, dtype=torch.int64),
                                     col=torch.arange(users_inter.shape[0], dtype=torch.int64),
                                     value=torch.tensor(no_times, dtype=torch.float64)).to(self.device)
+            # create sparse adjacency matrix
+            self.adj_sparse = SparseTensor(row=torch.cat([self.edge_index[0], self.edge_index[1]], dim=0),
+                                    col=torch.cat([self.edge_index[1], self.edge_index[0]], dim=0),
+                                    sparse_sizes=(self.num_users + self.num_items,
+                                                  self.num_users + self.num_items))
         return None
 
     def propagate_embeddings(self, evaluate=False):
@@ -177,12 +183,12 @@ class KGTOREModel(torch.nn.Module, ABC):
                     with torch.no_grad():
                         all_embeddings += [list(
                             self.propagation_network.children())[layer](
-                            all_embeddings[layer], self.edge_index)
+                            all_embeddings[layer], self.adj_sparse)
                         ]
                 else:
                     all_embeddings += [list(
                         self.propagation_network.children())[layer](
-                        all_embeddings[layer], self.edge_index)
+                        all_embeddings[layer], self.adj_sparse)
                     ]
 
             if evaluate:
