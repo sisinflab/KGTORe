@@ -134,13 +134,12 @@ class KGTOREModel(torch.nn.Module, ABC):
                                                          self.num_users + self.num_items)).to(self.device)
             # create matrix to sum user-decision path
             users_inter = self.edge_index[0][:self.num_interactions]
-            users_inter.to(self.device)
             unique, no_times = torch.tensor(users_inter, dtype=torch.int64).unique(return_counts=True)
             no_times = [[1 / int(i)] * i for i in no_times]
             no_times = list(itertools.chain(*no_times))
-            self.u_f = SparseTensor(row=torch.tensor(users_inter, dtype=torch.int64),
-                                    col=torch.arange(users_inter.shape[0], dtype=torch.int64),
-                                    value=torch.tensor(no_times, dtype=torch.float64)).to(self.device)
+            self.u_f = SparseTensor(row=torch.tensor(users_inter, dtype=torch.int64, device=self.device),
+                                    col=torch.arange(users_inter.shape[0], dtype=torch.int64, device=self.device),
+                                    value=torch.tensor(no_times, dtype=torch.float64, device=self.device)).to(self.device)
 
         return None
 
