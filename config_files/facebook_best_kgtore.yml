@@ -35,7 +35,7 @@ experiment:
       factors: 64
       ind_edges: 0.01
       n_layers: 3
-
+      aggr: zero
       npr: 20
       loader: KGTORETSVLoader
       seed: 123
