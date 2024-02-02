@@ -129,6 +129,7 @@ class KGTOREModel(torch.nn.Module, ABC):
                 self.device)
             # create matrix to sum user-decision path
             users_inter = self.edge_index[0][:self.num_interactions]
+            users_inter.to(self.device)
             unique, no_times = torch.tensor(users_inter, dtype=torch.int64).unique(return_counts=True)
             no_times = [[1 / int(i)] * i for i in no_times]
             no_times = list(itertools.chain(*no_times))
@@ -139,7 +140,7 @@ class KGTOREModel(torch.nn.Module, ABC):
             self.adj_sparse = SparseTensor(row=torch.cat([self.edge_index[0], self.edge_index[1]], dim=0),
                                     col=torch.cat([self.edge_index[1], self.edge_index[0]], dim=0),
                                     sparse_sizes=(self.num_users + self.num_items,
-                                                  self.num_users + self.num_items))
+                                                  self.num_users + self.num_items)).to(self.device)
         return None
 
     def propagate_embeddings(self, evaluate=False):
