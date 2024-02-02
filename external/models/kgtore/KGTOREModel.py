@@ -127,6 +127,11 @@ class KGTOREModel(torch.nn.Module, ABC):
                 propagation_network_list.append((LGConv(), 'x, edge_index -> x'))
             self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list).to(
                 self.device)
+            # create sparse adjacency matrix
+            self.adj_sparse = SparseTensor(row=torch.cat([self.edge_index[0], self.edge_index[1]], dim=0),
+                                           col=torch.cat([self.edge_index[1], self.edge_index[0]], dim=0),
+                                           sparse_sizes=(self.num_users + self.num_items,
+                                                         self.num_users + self.num_items)).to(self.device)
             # create matrix to sum user-decision path
             users_inter = self.edge_index[0][:self.num_interactions]
             users_inter.to(self.device)
@@ -136,11 +141,7 @@ class KGTOREModel(torch.nn.Module, ABC):
             self.u_f = SparseTensor(row=torch.tensor(users_inter, dtype=torch.int64),
                                     col=torch.arange(users_inter.shape[0], dtype=torch.int64),
                                     value=torch.tensor(no_times, dtype=torch.float64)).to(self.device)
-            # create sparse adjacency matrix
-            self.adj_sparse = SparseTensor(row=torch.cat([self.edge_index[0], self.edge_index[1]], dim=0),
-                                    col=torch.cat([self.edge_index[1], self.edge_index[0]], dim=0),
-                                    sparse_sizes=(self.num_users + self.num_items,
-                                                  self.num_users + self.num_items)).to(self.device)
+
         return None
 
     def propagate_embeddings(self, evaluate=False):
