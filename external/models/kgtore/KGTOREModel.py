@@ -121,7 +121,7 @@ class KGTOREModel(torch.nn.Module, ABC):
                     (KGTOReConv(alpha=(1 - self.a), beta=(1 - self.b)), 'x, edge_index -> x'))
             self.propagation_network = torch_geometric.nn.Sequential('x, edge_index', propagation_network_list).to(
                 self.device)
-        elif self.aggr == 'zero':
+        elif (self.aggr == 'zero') or (self.aggr == 'last'):
             # create zero propagation network
             for layer in range(self.n_layers):
                 propagation_network_list.append((LGConv(), 'x, edge_index -> x'))
@@ -140,7 +140,8 @@ class KGTOREModel(torch.nn.Module, ABC):
             self.uf = SparseTensor(row=torch.tensor(users_inter, dtype=torch.int64, device=self.device),
                                     col=torch.arange(users_inter.shape[0], dtype=torch.int64, device=self.device),
                                     value=torch.tensor(no_times, dtype=torch.float64, device=self.device)).to(self.device)
-
+        else:
+            raise NotImplementedError
         return None
 
     def propagate_embeddings(self, evaluate=False):
@@ -191,11 +192,32 @@ class KGTOREModel(torch.nn.Module, ABC):
                         self.propagation_network.children())[layer](
                         all_embeddings[layer], self.adj_sparse)
                     ]
-
             if evaluate:
                 self.propagation_network.train()
             all_embeddings = sum([all_embeddings[k] * self.alpha[k] for k in range(len(all_embeddings))])
             gu, gi = torch.split(all_embeddings, [self.num_users, self.num_items], 0)
+        elif self.aggr == 'last':
+            ego_embeddings = torch.cat((self.Gu, self.Gi), 0).to(self.device)
+            all_embeddings = [ego_embeddings]
+            for layer in range(0, self.n_layers):
+                if evaluate:
+                    self.propagation_network.eval()
+                    with torch.no_grad():
+                        all_embeddings += [list(
+                            self.propagation_network.children())[layer](
+                            all_embeddings[layer], self.adj_sparse)
+                        ]
+                else:
+                    all_embeddings += [list(
+                        self.propagation_network.children())[layer](
+                        all_embeddings[layer], self.adj_sparse)
+                    ]
+            if evaluate:
+                self.propagation_network.train()
+            all_embeddings = sum([all_embeddings[k] * self.alpha[k] for k in range(len(all_embeddings))])
+            gu, gi = torch.split(all_embeddings, [self.num_users, self.num_items], 0)
+            gi += matmul(self.item_features, self.F)
+            gu += matmul(self.uf, matmul(self.edge_features, self.F))
         else:
             raise NotImplementedError
         return gu.to(self.device), gi.to(self.device)
