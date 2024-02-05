@@ -18,7 +18,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
     @init_charger
     def __init__(self, data, config, params, *args, **kwargs):
         '''
-        _aggr: Aggregation type [standard (std), zero (only at layer zero)]
+        _aggr: Aggregation type [standard (std), zero (only at layer zero), last (only at last layer)]
         '''
 
         self._sampler = cs.Sampler(self._data.i_train_dict)
