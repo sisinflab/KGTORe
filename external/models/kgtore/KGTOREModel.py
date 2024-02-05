@@ -215,9 +215,9 @@ class KGTOREModel(torch.nn.Module, ABC):
             if evaluate:
                 self.propagation_network.train()
             all_embeddings = sum([all_embeddings[k] * self.alpha[k] for k in range(len(all_embeddings))])
-            gu, gi = torch.split(all_embeddings, [self.num_users, self.num_items], 0)
-            gi += matmul(self.item_features, self.F)
-            gu += matmul(self.uf, matmul(self.edge_features, self.F))
+            Gu, Gi = torch.split(all_embeddings, [self.num_users, self.num_items], 0)
+            gi = Gi + matmul(self.item_features, self.F)
+            gu = Gu + matmul(self.uf, matmul(self.edge_features, self.F))
         else:
             raise NotImplementedError
         return gu.to(self.device), gi.to(self.device)
