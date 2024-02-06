@@ -9,7 +9,7 @@ CONFIG_DIR = './config_files'
 assert os.path.exists(CONFIG_DIR)
 
 # Preprocessing
-# yahoo_movies_preprocessing.run(data_folder=yahoo_movies_folder)
+yahoo_movies_preprocessing.run(data_folder=yahoo_movies_folder)
 
 # alpha beta parameters:
 alphas = [str(i) for i in [0, 0.2, 0.4, 0.6, 0.8, 1]]
