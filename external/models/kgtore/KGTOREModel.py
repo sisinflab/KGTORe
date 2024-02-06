@@ -141,8 +141,9 @@ class KGTOREModel(torch.nn.Module, ABC):
             no_times = [[1 / int(i)] * i for i in no_times]
             no_times = list(itertools.chain(*no_times))
             self.uf = SparseTensor(row=torch.tensor(users_inter, dtype=torch.int64, device=self.device),
-                                    col=torch.arange(users_inter.shape[0], dtype=torch.int64, device=self.device),
-                                    value=torch.tensor(no_times, dtype=torch.float64, device=self.device)).to(self.device)
+                                   col=torch.arange(users_inter.shape[0], dtype=torch.int64, device=self.device),
+                                   value=torch.tensor(no_times, dtype=torch.float64, device=self.device)).to(
+                self.device)
         else:
             raise NotImplementedError
         return None
@@ -176,9 +177,9 @@ class KGTOREModel(torch.nn.Module, ABC):
             all_embeddings = sum([all_embeddings[k] * self.alpha[k] for k in range(len(all_embeddings))])
             gu, gi = torch.split(all_embeddings, [self.num_users, self.num_items], 0)
         elif self.aggr == 'zero':
-            Gi = matmul(self.item_features, self.F) + self.Gi  # * self.a
+            Gi = (self.a * matmul(self.item_features, self.F)) + ((1 - self.a) * self.Gi)  # * self.a
             Gi.to(self.device)
-            Gu = self.Gu + matmul(self.uf, matmul(self.edge_features, self.F))
+            Gu = ((1 - self.b) * self.Gu) + (self.b * matmul(self.uf, matmul(self.edge_features, self.F)))
             Gu.to(self.device)
             ego_embeddings = torch.cat((Gu, Gi), 0).to(self.device)
             all_embeddings = [ego_embeddings]
@@ -219,8 +220,8 @@ class KGTOREModel(torch.nn.Module, ABC):
                 self.propagation_network.train()
             all_embeddings = sum([all_embeddings[k] * self.alpha[k] for k in range(len(all_embeddings))])
             Gu, Gi = torch.split(all_embeddings, [self.num_users, self.num_items], 0)
-            gi = Gi + matmul(self.item_features, self.F)
-            gu = Gu + matmul(self.uf, matmul(self.edge_features, self.F))
+            gi = ((1 - self.a) * Gi) + (matmul(self.item_features, self.F) * self.a)
+            gu = ((1 - self.b) * Gu) + (matmul(self.uf, matmul(self.edge_features, self.F)) * self.b)
         else:
             raise NotImplementedError
         return gu.to(self.device), gi.to(self.device)
