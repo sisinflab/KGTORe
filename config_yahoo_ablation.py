@@ -37,6 +37,7 @@ TEMPLATE = '''experiment:
       n_layers: 3
       npr: 20
       aggr: {aggr}
+      mode: abl_rnd
       loader: KGTORETSVLoader
       seed: 123
       early_stopping:

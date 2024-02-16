@@ -4,6 +4,7 @@ import torch
 import os
 
 
+
 from elliot.utils.write import store_recommendation
 from elliot.dataset.samplers import custom_sampler as cs
 from elliot.recommender import BaseRecommenderModel
@@ -12,6 +13,7 @@ from elliot.recommender.recommender_utils_mixin import RecMixin
 from .KGTOREModel import KGTOREModel
 from .DecisionPaths import DecisionPaths
 from .LoadEdgeFeatures import LoadEdgeFeatures
+from .Ablation import build_random_item_features
 
 
 class KGTORE(RecMixin, BaseRecommenderModel):
@@ -87,11 +89,11 @@ class KGTORE(RecMixin, BaseRecommenderModel):
                                             depth=self._depth,
                                             seed=self._seed
                                             )
-            self.edge_features = Dec_Paths_class.edge_features  # n_transaction * n_features
-            self.item_features = Dec_Paths_class.item_features  # n_items * n_features
+            self.edge_features = Dec_Paths_class.edge_features.copy()  # n_transaction * n_features
+            self.item_features = Dec_Paths_class.item_features.copy()  # n_items * n_features
 
         if self._mode == "abl_rnd":
-            print()
+            self.item_features = build_random_item_features(item_features=self.item_features, seed=self._seed)
 
         col = [c + self._num_users for c in col]
         self.edge_index = np.array([list(row) + col, col + list(row)])
