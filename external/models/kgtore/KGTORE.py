@@ -42,6 +42,7 @@ class KGTORE(RecMixin, BaseRecommenderModel):
             ("_seed", "seed", "s", 10, int, None),
             ("_criterion", "criterion", "crt", "entropy", str, None),
             ("_aggr", "aggr", "ag", "std", str, None),
+            ("_mode", "mode", "md", "std", str, None),
             ("_loader", "loader", "ldr", "KGTORETSVLoader", None, lambda x: x[0])
         ]
 
@@ -88,6 +89,9 @@ class KGTORE(RecMixin, BaseRecommenderModel):
                                             )
             self.edge_features = Dec_Paths_class.edge_features  # n_transaction * n_features
             self.item_features = Dec_Paths_class.item_features  # n_items * n_features
+
+        if self._mode == "abl_rnd":
+            print()
 
         col = [c + self._num_users for c in col]
         self.edge_index = np.array([list(row) + col, col + list(row)])
