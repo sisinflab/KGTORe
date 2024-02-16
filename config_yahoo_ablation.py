@@ -26,7 +26,7 @@ TEMPLATE = '''experiment:
         validation_metric: nDCGRendle2020@10
       batch_size: 256
       lr: [ loguniform, -9.2103403719, -5.298317 ]
-      elr: [ loguniform, -6,907755278982137, -3.506557897319982 ]
+      elr: [ loguniform, -6.907755278982137, -3.506557897319982 ]
       l_w: [ loguniform, -7.600902459542082, -3.912023005428146 ]
       epochs: 200
       factors: 64
