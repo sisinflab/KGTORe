@@ -1,7 +1,7 @@
 import os
 import pandas as pd
 file_type = ".tsv"
-PATH = './yahoo_res_ext'
+PATH = './yahoo_ablation'
 
 assert os.path.exists(PATH)
 
